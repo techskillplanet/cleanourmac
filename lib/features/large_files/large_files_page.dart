@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format/byte_format.dart';
+import '../../core/l10n/localization_extensions.dart';
 import '../../core/theme/safety_colors.dart';
+import '../../core/widgets/app_page_title.dart';
 import '../../domain/models/large_file.dart';
 import '../../providers/large_files_provider.dart';
 import '../../providers/infra_providers.dart';
@@ -16,20 +18,23 @@ class LargeFilesPage extends ConsumerWidget {
     final state = ref.watch(largeFilesProvider);
     final notifier = ref.read(largeFilesProvider.notifier);
     final settings = ref.watch(settingsProvider);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Large Files'),
-        elevation: 0,
+        title: AppPageTitle(
+          title: l10n.largeFiles,
+          subtitle: l10n.largeFilesSubtitle,
+        ),
         actions: [
           if (state.files.isNotEmpty && !state.scanning) ...[
             TextButton(
               onPressed: () => notifier.toggleAll(true),
-              child: const Text('全选'),
+              child: Text(l10n.selectAll),
             ),
             TextButton(
               onPressed: () => notifier.toggleAll(false),
-              child: const Text('取消全选'),
+              child: Text(l10n.deselectAll),
             ),
           ],
           TextButton.icon(
@@ -38,19 +43,22 @@ class LargeFilesPage extends ConsumerWidget {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2))
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 : const Icon(Icons.search_rounded),
-            label: Text(state.scanning ? '扫描中...' : '扫描'),
+            label: Text(state.scanning ? l10n.scanning : l10n.scan),
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: state.files.isEmpty && !state.scanning
-          ? _EmptyState(threshold: settings.largeFileThresholdMB, onScan: () => notifier.scan())
+          ? _EmptyState(
+              threshold: settings.largeFileThresholdMB,
+              onScan: () => notifier.scan(),
+            )
           : Column(
               children: [
-                if (state.scanning)
-                  const LinearProgressIndicator(),
+                if (state.scanning) const LinearProgressIndicator(),
                 if (state.deletedCount != null)
                   _DoneBanner(
                     count: state.deletedCount!,
@@ -58,7 +66,9 @@ class LargeFilesPage extends ConsumerWidget {
                   ),
                 _SummaryBar(state: state, notifier: notifier),
                 const Divider(height: 1),
-                Expanded(child: _FileList(state: state, notifier: notifier)),
+                Expanded(
+                  child: _FileList(state: state, notifier: notifier),
+                ),
                 if (state.selectedCount > 0)
                   _CleanBar(
                     state: state,
@@ -70,11 +80,14 @@ class LargeFilesPage extends ConsumerWidget {
   }
 
   Future<void> _confirmAndDelete(
-      BuildContext ctx, WidgetRef ref, LargeFilesNotifier notifier) async {
+    BuildContext ctx,
+    WidgetRef ref,
+    LargeFilesNotifier notifier,
+  ) async {
     final toDelete = notifier.dryRun();
     if (toDelete.isEmpty) {
       ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(content: Text('没有可安全删除的文件（PathGuard 拦截）')),
+        SnackBar(content: Text(ctx.l10n.largeFilesNoSafeCandidates)),
       );
       return;
     }
@@ -84,7 +97,7 @@ class LargeFilesPage extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: ctx,
       builder: (c) => AlertDialog(
-        title: const Text('确认删除'),
+        title: Text(ctx.l10n.confirmDelete),
         content: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500, maxHeight: 360),
           child: Column(
@@ -92,13 +105,19 @@ class LargeFilesPage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${toDelete.length} 个文件 · 共 ${formatBytes(totalBytes)}',
+                ctx.l10n.fileDeleteSummary(
+                  toDelete.length,
+                  formatBytes(totalBytes, locale: ctx.localeName),
+                ),
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 4),
-              const Text(
-                '这些文件将被永久删除，无法恢复。',
-                style: TextStyle(color: Colors.red, fontSize: 13),
+              Text(
+                ctx.l10n.permanentDeleteWarning,
+                style: TextStyle(
+                  color: Theme.of(ctx).colorScheme.error,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 12),
               Flexible(
@@ -106,32 +125,46 @@ class LargeFilesPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: toDelete
-                        .map((f) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.insert_drive_file_rounded,
-                                      size: 12, color: Colors.grey),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      f.path,
-                                      style: const TextStyle(
-                                          fontSize: 11,
-                                          fontFamily: 'monospace',
-                                          color: Colors.grey),
-                                      overflow: TextOverflow.ellipsis,
+                        .map(
+                          (f) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.insert_drive_file_rounded,
+                                  size: 12,
+                                  color: Theme.of(
+                                    ctx,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    f.path,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontFamily: 'monospace',
+                                      color: Theme.of(
+                                        ctx,
+                                      ).colorScheme.onSurfaceVariant,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  Text(
-                                    formatBytes(f.sizeBytes),
-                                    style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600),
+                                ),
+                                Text(
+                                  formatBytes(
+                                    f.sizeBytes,
+                                    locale: ctx.localeName,
                                   ),
-                                ],
-                              ),
-                            ))
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
                         .toList(),
                   ),
                 ),
@@ -142,12 +175,14 @@ class LargeFilesPage extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('取消'),
+            child: Text(ctx.l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(c, true),
-            style: FilledButton.styleFrom(backgroundColor: SafetyColors.danger),
-            child: const Text('永久删除'),
+            style: FilledButton.styleFrom(
+              backgroundColor: SafetyColors.dangerFor(ctx),
+            ),
+            child: Text(ctx.l10n.permanentlyDelete),
           ),
         ],
       ),
@@ -172,21 +207,33 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.folder_open_rounded, size: 64, color: Colors.grey),
+          Icon(
+            Icons.folder_open_rounded,
+            size: 64,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(height: 16),
-          Text('查找大于 $threshold MB 的文件',
-              style: const TextStyle(color: Colors.grey, fontSize: 15)),
+          Text(
+            context.l10n.findFilesOver(threshold),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 15,
+            ),
+          ),
           const SizedBox(height: 8),
-          const Text(
-            '安全分类：缓存/临时文件自动标绿，系统/SDK/源码文件不会列出',
-            style: TextStyle(color: Colors.grey, fontSize: 12),
+          Text(
+            context.l10n.largeFileSafetyDescription,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: onScan,
             icon: const Icon(Icons.search_rounded),
-            label: const Text('开始扫描'),
+            label: Text(context.l10n.startScan),
           ),
         ],
       ),
@@ -203,33 +250,49 @@ class _SummaryBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final safeCount = state.files.where((f) => f.safety == LargeFileSafety.safe).length;
-    final cautionCount = state.files.where((f) => f.safety == LargeFileSafety.caution).length;
+    final safeCount = state.files
+        .where((f) => f.safety == LargeFileSafety.safe)
+        .length;
+    final cautionCount = state.files
+        .where((f) => f.safety == LargeFileSafety.caution)
+        .length;
     final total = state.files.fold(0, (s, f) => s + f.sizeBytes);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          Text('共 ${state.files.length} 个文件 · ${formatBytes(total)}',
-              style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(
+            context.l10n.largeFilesSummary(
+              state.files.length,
+              formatBytes(total, locale: context.localeName),
+            ),
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(width: 12),
           if (safeCount > 0)
             _Tag(
-              color: SafetyColors.safe,
-              label: '安全 $safeCount',
+              color: SafetyColors.safeFor(context),
+              label: context.l10n.safeCount(safeCount),
               onTap: () => notifier.selectBySafety(LargeFileSafety.safe, true),
             ),
           const SizedBox(width: 6),
           if (cautionCount > 0)
             _Tag(
-              color: SafetyColors.caution,
-              label: '需确认 $cautionCount',
-              onTap: () => notifier.selectBySafety(LargeFileSafety.caution, true),
+              color: SafetyColors.cautionFor(context),
+              label: context.l10n.cautionCount(cautionCount),
+              onTap: () =>
+                  notifier.selectBySafety(LargeFileSafety.caution, true),
             ),
           const Spacer(),
           if (state.scanning)
-            const Text('扫描中...', style: TextStyle(color: Colors.grey, fontSize: 12)),
+            Text(
+              context.l10n.scanning,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 12,
+              ),
+            ),
         ],
       ),
     );
@@ -253,8 +316,14 @@ class _Tag extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
-        child: Text(label,
-            style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
@@ -270,40 +339,59 @@ class _FileList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Group by safety
-    final safeFiles = state.files.where((f) => f.safety == LargeFileSafety.safe).toList();
-    final cautionFiles = state.files.where((f) => f.safety == LargeFileSafety.caution).toList();
+    final safeFiles = state.files
+        .where((f) => f.safety == LargeFileSafety.safe)
+        .toList();
+    final cautionFiles = state.files
+        .where((f) => f.safety == LargeFileSafety.caution)
+        .toList();
 
     final items = <Widget>[];
 
     if (safeFiles.isNotEmpty) {
-      items.add(_SectionHeader(
-        label: '可安全删除',
-        color: SafetyColors.safe,
-        count: safeFiles.length,
-        totalBytes: safeFiles.fold(0, (s, f) => s + f.sizeBytes),
-        onSelectAll: () => notifier.selectBySafety(LargeFileSafety.safe, true),
-        onDeselectAll: () => notifier.selectBySafety(LargeFileSafety.safe, false),
-      ));
+      items.add(
+        _SectionHeader(
+          label: context.l10n.safeToDelete,
+          color: SafetyColors.safeFor(context),
+          count: safeFiles.length,
+          totalBytes: safeFiles.fold(0, (s, f) => s + f.sizeBytes),
+          onSelectAll: () =>
+              notifier.selectBySafety(LargeFileSafety.safe, true),
+          onDeselectAll: () =>
+              notifier.selectBySafety(LargeFileSafety.safe, false),
+        ),
+      );
       for (final f in safeFiles) {
-        items.add(_FileTile(file: f, onToggle: (v) => notifier.toggle(f.path, v)));
+        items.add(
+          _FileTile(file: f, onToggle: (v) => notifier.toggle(f.path, v)),
+        );
       }
     }
 
     if (cautionFiles.isNotEmpty) {
-      items.add(_SectionHeader(
-        label: '需要确认',
-        color: SafetyColors.caution,
-        count: cautionFiles.length,
-        totalBytes: cautionFiles.fold(0, (s, f) => s + f.sizeBytes),
-        onSelectAll: () => notifier.selectBySafety(LargeFileSafety.caution, true),
-        onDeselectAll: () => notifier.selectBySafety(LargeFileSafety.caution, false),
-      ));
+      items.add(
+        _SectionHeader(
+          label: context.l10n.requiresReview,
+          color: SafetyColors.cautionFor(context),
+          count: cautionFiles.length,
+          totalBytes: cautionFiles.fold(0, (s, f) => s + f.sizeBytes),
+          onSelectAll: () =>
+              notifier.selectBySafety(LargeFileSafety.caution, true),
+          onDeselectAll: () =>
+              notifier.selectBySafety(LargeFileSafety.caution, false),
+        ),
+      );
       for (final f in cautionFiles) {
-        items.add(_FileTile(file: f, onToggle: (v) => notifier.toggle(f.path, v)));
+        items.add(
+          _FileTile(file: f, onToggle: (v) => notifier.toggle(f.path, v)),
+        );
       }
     }
 
-    return ListView(padding: const EdgeInsets.only(bottom: 80), children: items);
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 80),
+      children: items,
+    );
   }
 }
 
@@ -337,28 +425,46 @@ class _SectionHeader extends StatelessWidget {
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 8),
-          Text(label,
-              style: TextStyle(
-                  fontWeight: FontWeight.w700, fontSize: 13, color: color)),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              color: color,
+            ),
+          ),
           const SizedBox(width: 8),
-          Text('$count 个 · ${formatBytes(totalBytes)}',
-              style: TextStyle(fontSize: 12, color: color.withValues(alpha: 0.7))),
+          Text(
+            context.l10n.countAndSize(
+              count,
+              formatBytes(totalBytes, locale: context.localeName),
+            ),
+            style: TextStyle(fontSize: 12, color: color.withValues(alpha: 0.7)),
+          ),
           const Spacer(),
           TextButton(
             onPressed: onSelectAll,
             style: TextButton.styleFrom(
-                minimumSize: Size.zero,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-            child: const Text('全选', style: TextStyle(fontSize: 12)),
+              minimumSize: Size.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              context.l10n.selectAll,
+              style: const TextStyle(fontSize: 12),
+            ),
           ),
           TextButton(
             onPressed: onDeselectAll,
             style: TextButton.styleFrom(
-                minimumSize: Size.zero,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-            child: const Text('取消', style: TextStyle(fontSize: 12)),
+              minimumSize: Size.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              context.l10n.cancel,
+              style: const TextStyle(fontSize: 12),
+            ),
           ),
         ],
       ),
@@ -373,10 +479,11 @@ class _FileTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('yyyy-MM-dd');
+    final l10n = context.l10n;
+    final fmt = DateFormat.yMd(context.localeName);
     final safeColor = file.safety == LargeFileSafety.safe
-        ? SafetyColors.safe
-        : SafetyColors.caution;
+        ? SafetyColors.safeFor(context)
+        : SafetyColors.cautionFor(context);
 
     return CheckboxListTile(
       value: file.selected,
@@ -399,8 +506,12 @@ class _FileTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              file.safety == LargeFileSafety.safe ? '安全' : '需确认',
-              style: TextStyle(fontSize: 10, color: safeColor, fontWeight: FontWeight.w600),
+              l10n.largeFileSafetyLabel(file.safety),
+              style: TextStyle(
+                fontSize: 10,
+                color: safeColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -411,11 +522,17 @@ class _FileTile extends StatelessWidget {
           Text(
             file.path,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           Text(
-            file.safetyReason,
-            style: TextStyle(fontSize: 10, color: safeColor.withValues(alpha: 0.8)),
+            l10n.largeFileSafetyReason(file.safety),
+            style: TextStyle(
+              fontSize: 10,
+              color: safeColor.withValues(alpha: 0.8),
+            ),
           ),
         ],
       ),
@@ -424,18 +541,24 @@ class _FileTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            formatBytes(file.sizeBytes),
+            formatBytes(file.sizeBytes, locale: context.localeName),
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
           ),
           Text(
             fmt.format(file.modifiedAt),
-            style: const TextStyle(fontSize: 10, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 10,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           GestureDetector(
             onTap: () => Process.run('open', ['-R', file.path]),
-            child: const Text(
-              '在 Finder 中显示',
-              style: TextStyle(fontSize: 10, color: Colors.blue),
+            child: Text(
+              l10n.showInFinder,
+              style: TextStyle(
+                fontSize: 10,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
         ],
@@ -463,9 +586,12 @@ class _CleanBar extends StatelessWidget {
         children: [
           Icon(
             Icons.delete_sweep_rounded,
-            color: state.files.any((f) => f.selected && f.safety == LargeFileSafety.safe)
-                ? SafetyColors.safe
-                : SafetyColors.caution,
+            color:
+                state.files.any(
+                  (f) => f.selected && f.safety == LargeFileSafety.safe,
+                )
+                ? SafetyColors.safeFor(context)
+                : SafetyColors.cautionFor(context),
           ),
           const SizedBox(width: 12),
           Column(
@@ -473,27 +599,35 @@ class _CleanBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '已选 ${state.selectedCount} 个文件',
+                context.l10n.selectedFiles(state.selectedCount),
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               Text(
-                '共 ${formatBytes(state.selectedBytes)}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                context.l10n.totalSize(
+                  formatBytes(state.selectedBytes, locale: context.localeName),
+                ),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
           const Spacer(),
           if (state.deleting)
             const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2))
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
           else
             FilledButton.icon(
               onPressed: onClean,
               icon: const Icon(Icons.delete_rounded),
-              label: const Text('删除所选'),
-              style: FilledButton.styleFrom(backgroundColor: SafetyColors.danger),
+              label: Text(context.l10n.deleteSelected),
+              style: FilledButton.styleFrom(
+                backgroundColor: SafetyColors.dangerFor(context),
+              ),
             ),
         ],
       ),
@@ -512,15 +646,25 @@ class _DoneBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: SafetyColors.safeLight,
+      color: SafetyColors.safeSurfaceFor(context),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_rounded, color: SafetyColors.safe, size: 18),
+          Icon(
+            Icons.check_circle_rounded,
+            color: SafetyColors.safeFor(context),
+            size: 18,
+          ),
           const SizedBox(width: 8),
           Text(
-            '已删除 $count 个文件，释放 ${formatBytes(bytes)}',
-            style: const TextStyle(
-                color: SafetyColors.safe, fontWeight: FontWeight.w600, fontSize: 13),
+            context.l10n.deletedFilesSummary(
+              count,
+              formatBytes(bytes, locale: context.localeName),
+            ),
+            style: TextStyle(
+              color: SafetyColors.safeFor(context),
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
           ),
         ],
       ),

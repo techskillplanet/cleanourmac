@@ -20,6 +20,7 @@ class CleanupTarget {
   final ScanStrategy strategy;
   final bool contentsOnly;
   final Set<String> keepChildren;
+  final Set<String> includeChildPrefixes;
   final Set<String> includeChildSuffixes;
   final Set<String> includeExtensions;
   final int minimumSizeBytes;
@@ -33,6 +34,7 @@ class CleanupTarget {
     this.strategy = ScanStrategy.duSingle,
     this.contentsOnly = false,
     this.keepChildren = const {},
+    this.includeChildPrefixes = const {},
     this.includeChildSuffixes = const {},
     this.includeExtensions = const {},
     this.minimumSizeBytes = 0,

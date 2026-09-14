@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format/byte_format.dart';
+import '../../core/l10n/localization_extensions.dart';
 import '../../core/theme/safety_colors.dart';
+import '../../core/widgets/app_page_title.dart';
 import '../../domain/models/category_summary.dart';
 import '../../domain/models/cleanup_target.dart';
 import '../../domain/models/disk_usage.dart';
@@ -26,23 +28,26 @@ class _ScanPageState extends ConsumerState<ScanPage> {
     final candidates = ref.watch(cleanupCandidateBytesProvider);
     final clean = ref.watch(cleanProvider);
     final diskAsync = ref.watch(diskUsageProvider);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Main Disk Scan'),
-        elevation: 0,
+        title: AppPageTitle(
+          title: l10n.scanAndClean,
+          subtitle: l10n.scanPageSubtitle,
+        ),
         actions: [
           if (scan.phase == ScanPhase.scanning)
             TextButton.icon(
               onPressed: () => ref.read(scanProvider.notifier).cancel(),
               icon: const Icon(Icons.stop_circle_outlined),
-              label: const Text('Cancel'),
+              label: Text(l10n.cancel),
             )
           else
             TextButton.icon(
               onPressed: () => ref.read(scanProvider.notifier).startScan(),
               icon: const Icon(Icons.search_rounded),
-              label: const Text('Scan'),
+              label: Text(l10n.scan),
             ),
           const SizedBox(width: 8),
         ],
@@ -53,12 +58,22 @@ class _ScanPageState extends ConsumerState<ScanPage> {
             LinearProgressIndicator(
               value: scan.progress == 0 ? null : scan.progress,
             ),
-            if (scan.currentLabel != null)
+            if (scan.currentTargetId != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  'Scanning ${scan.currentLabel}...',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  l10n.scanningTarget(
+                    l10n.cleanupTargetLabel(
+                      scan.currentTargetId!,
+                      fallback:
+                          scan.categories[scan.currentTargetId]?.target.label ??
+                          scan.currentTargetId!,
+                    ),
+                  ),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
           ],
@@ -67,13 +82,21 @@ class _ScanPageState extends ConsumerState<ScanPage> {
               children: [
                 LinearProgressIndicator(
                   value: clean.fraction,
-                  color: SafetyColors.safe,
+                  color: SafetyColors.safeFor(context),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Text(
-                    'Cleaning... ${formatBytes(clean.reclaimedBytes)} reclaimed',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    l10n.cleaningReclaimed(
+                      formatBytes(
+                        clean.reclaimedBytes,
+                        locale: context.localeName,
+                      ),
+                    ),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
@@ -84,22 +107,27 @@ class _ScanPageState extends ConsumerState<ScanPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.search_rounded,
                           size: 64,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Press Scan to analyze your disk',
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        Text(
+                          l10n.scanEmptyPrompt,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         FilledButton.icon(
                           onPressed: () =>
                               ref.read(scanProvider.notifier).startScan(),
                           icon: const Icon(Icons.search_rounded),
-                          label: const Text('Start Scan'),
+                          label: Text(l10n.startScan),
                         ),
                       ],
                     ),
@@ -146,6 +174,8 @@ class _ScanPageState extends ConsumerState<ScanPage> {
     WidgetRef ref,
     ScanState scan,
   ) async {
+    final l10n = ctx.l10n;
+    final locale = ctx.localeName;
     final summaries = ref.read(scanProvider.notifier).selectedSummaries;
     final repo = ref.read(cleanRepositoryProvider);
     final items = repo.dryRun(summaries);
@@ -154,7 +184,7 @@ class _ScanPageState extends ConsumerState<ScanPage> {
     final confirm = await showDialog<bool>(
       context: ctx,
       builder: (c) => AlertDialog(
-        title: const Text('Confirm Clean'),
+        title: Text(l10n.confirmClean),
         content: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480, maxHeight: 320),
           child: Column(
@@ -162,7 +192,10 @@ class _ScanPageState extends ConsumerState<ScanPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${items.length} items • ${formatBytes(total)} will be permanently deleted.',
+                l10n.cleanDeleteSummary(
+                  items.length,
+                  formatBytes(total, locale: locale),
+                ),
               ),
               const SizedBox(height: 12),
               Expanded(
@@ -192,12 +225,14 @@ class _ScanPageState extends ConsumerState<ScanPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(c, true),
-            style: FilledButton.styleFrom(backgroundColor: SafetyColors.danger),
-            child: const Text('Delete'),
+            style: FilledButton.styleFrom(
+              backgroundColor: SafetyColors.dangerFor(context),
+            ),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -223,8 +258,10 @@ class _MainDiskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
+    final locale = context.localeName;
     return Card(
-      color: cs.primaryContainer.withValues(alpha: 0.45),
+      color: cs.surfaceContainerLowest,
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -236,30 +273,35 @@ class _MainDiskCard extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.12),
+                    color: cs.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(Icons.laptop_mac_rounded, color: cs.primary),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Macintosh HD · Primary Data Volume',
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                        l10n.macintoshDiskName,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
-                        '/System/Volumes/Data · allocated size, not sparse logical size',
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                        l10n.primaryDataVolumeDescription,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Text(
-                  '${formatBytes(disk.usedBytes)} used',
+                  l10n.diskUsed(
+                    formatDiskBytes(disk.usedBytes, locale: locale),
+                  ),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               ],
@@ -277,22 +319,25 @@ class _MainDiskCard extends StatelessWidget {
             Row(
               children: [
                 _DiskMetric(
-                  label: 'Capacity',
-                  value: formatBytes(disk.totalBytes),
+                  label: l10n.capacity,
+                  value: formatDiskBytes(disk.totalBytes, locale: locale),
                 ),
                 const SizedBox(width: 28),
-                _DiskMetric(label: 'Free', value: formatBytes(disk.freeBytes)),
+                _DiskMetric(
+                  label: l10n.overviewFree,
+                  value: formatDiskBytes(disk.freeBytes, locale: locale),
+                ),
                 const Spacer(),
                 _DiskMetric(
-                  label: 'Candidates found',
-                  value: formatBytes(candidateBytes),
-                  color: SafetyColors.caution,
+                  label: l10n.candidatesFound,
+                  value: formatBytes(candidateBytes, locale: locale),
+                  color: SafetyColors.cautionFor(context),
                 ),
                 const SizedBox(width: 28),
                 _DiskMetric(
-                  label: 'Selected',
-                  value: formatBytes(selectedBytes),
-                  color: SafetyColors.safe,
+                  label: l10n.selected,
+                  value: formatBytes(selectedBytes, locale: locale),
+                  color: SafetyColors.safeFor(context),
                 ),
               ],
             ),
@@ -308,18 +353,18 @@ class _MainDiskLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
+    return Card(
       child: Padding(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         child: Row(
           children: [
-            SizedBox(
+            const SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
-            SizedBox(width: 12),
-            Text('Reading primary disk usage...'),
+            const SizedBox(width: 12),
+            Text(context.l10n.readingDiskUsage),
           ],
         ),
       ),
@@ -339,7 +384,13 @@ class _DiskMetric extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
         const SizedBox(height: 2),
         Text(
           value,
@@ -356,7 +407,9 @@ class _CategoryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final safeColor = _safetyColor(summary.target.safety);
+    final safeColor = _safetyColor(context, summary.target.safety);
+    final l10n = context.l10n;
+    final locale = context.localeName;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -391,16 +444,23 @@ class _CategoryCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      summary.target.label,
+                      l10n.cleanupTargetLabel(
+                        summary.target.id,
+                        fallback: summary.target.label,
+                      ),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      summary.error ?? summary.target.description,
+                      summary.error ??
+                          l10n.cleanupTargetDescription(
+                            summary.target.id,
+                            fallback: summary.target.description,
+                          ),
                       style: TextStyle(
                         fontSize: 12,
                         color: summary.error == null
-                            ? Colors.grey
-                            : SafetyColors.danger,
+                            ? Theme.of(context).colorScheme.onSurfaceVariant
+                            : SafetyColors.dangerFor(context),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -419,15 +479,21 @@ class _CategoryCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      formatBytes(summary.totalBytes),
+                      formatBytes(summary.totalBytes, locale: locale),
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
                       ),
                     ),
                     Text(
-                      '${summary.items.length} found · ${summary.items.where((i) => i.selected).length} selected',
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      l10n.foundAndSelected(
+                        summary.items.length,
+                        summary.items.where((i) => i.selected).length,
+                      ),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -438,10 +504,10 @@ class _CategoryCard extends ConsumerWidget {
     );
   }
 
-  Color _safetyColor(SafetyLevel s) => switch (s) {
-    SafetyLevel.safe => SafetyColors.safe,
-    SafetyLevel.caution => SafetyColors.caution,
-    SafetyLevel.danger => SafetyColors.danger,
+  Color _safetyColor(BuildContext context, SafetyLevel s) => switch (s) {
+    SafetyLevel.safe => SafetyColors.safeFor(context),
+    SafetyLevel.caution => SafetyColors.cautionFor(context),
+    SafetyLevel.danger => SafetyColors.dangerFor(context),
   };
 }
 
@@ -460,18 +526,25 @@ class _CleanBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.cleaning_services_rounded, color: SafetyColors.safe),
+          Icon(
+            Icons.cleaning_services_rounded,
+            color: SafetyColors.safeFor(context),
+          ),
           const SizedBox(width: 12),
           Text(
-            '${formatBytes(recoverable)} selected to clean',
+            context.l10n.selectedToClean(
+              formatBytes(recoverable, locale: context.localeName),
+            ),
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           const Spacer(),
           FilledButton.icon(
             onPressed: onClean,
             icon: const Icon(Icons.delete_sweep_rounded),
-            label: const Text('Clean Now'),
-            style: FilledButton.styleFrom(backgroundColor: SafetyColors.safe),
+            label: Text(context.l10n.cleanNow),
+            style: FilledButton.styleFrom(
+              backgroundColor: SafetyColors.safeFor(context),
+            ),
           ),
         ],
       ),
@@ -488,20 +561,25 @@ class _DoneBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      color: SafetyColors.safeLight,
+      color: SafetyColors.safeSurfaceFor(context),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_rounded, color: SafetyColors.safe),
+          Icon(
+            Icons.check_circle_rounded,
+            color: SafetyColors.safeFor(context),
+          ),
           const SizedBox(width: 12),
           Text(
-            'Done! ${formatBytes(reclaimed)} reclaimed',
-            style: const TextStyle(
+            context.l10n.cleanDone(
+              formatBytes(reclaimed, locale: context.localeName),
+            ),
+            style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: SafetyColors.safe,
+              color: SafetyColors.safeFor(context),
             ),
           ),
           const Spacer(),
-          TextButton(onPressed: onDismiss, child: const Text('Dismiss')),
+          TextButton(onPressed: onDismiss, child: Text(context.l10n.dismiss)),
         ],
       ),
     );

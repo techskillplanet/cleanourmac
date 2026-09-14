@@ -16,6 +16,20 @@ class _FakeRunner extends ShellRunner {
   }
 }
 
+class _RecordingRunner extends ShellRunner {
+  final List<(String, List<String>)> commands = [];
+
+  @override
+  Future<ShellResult> run(
+    String executable,
+    List<String> args, {
+    Map<String, String>? environment,
+  }) async {
+    commands.add((executable, List.of(args)));
+    return const ShellResult('', '', 0);
+  }
+}
+
 const _sampleJson = '''
 {
   "devices": {
@@ -118,6 +132,30 @@ void main() {
       expect(runtimes.single.displayName, 'iOS 18.5');
       expect(runtimes.single.sizeBytes, 8837333817);
       expect(runtimes.single.lastUsedAt, isNotNull);
+    });
+
+    test('installs apps and opens URLs on the selected simulator', () async {
+      final runner = _RecordingRunner();
+      final client = SimctlClient(runner);
+
+      await client.installApp('ABC123', '/tmp/Demo.app');
+      await client.openUrl('ABC123', 'myapp://debug');
+
+      expect(runner.commands, hasLength(2));
+      expect(runner.commands[0].$1, 'xcrun');
+      expect(runner.commands[0].$2, [
+        'simctl',
+        'install',
+        'ABC123',
+        '/tmp/Demo.app',
+      ]);
+      expect(runner.commands[1].$1, 'xcrun');
+      expect(runner.commands[1].$2, [
+        'simctl',
+        'openurl',
+        'ABC123',
+        'myapp://debug',
+      ]);
     });
   });
 }

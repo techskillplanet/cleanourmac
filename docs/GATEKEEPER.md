@@ -1,19 +1,19 @@
 # Gatekeeper & Signing Notes
 
-Mac Tool is distributed as an **ad-hoc signed** DMG (no Apple Developer ID certificate).
+Mobile 开发助手 is distributed as an **ad-hoc signed** DMG (no Apple Developer ID certificate).
 macOS Gatekeeper will block it by default. Follow one of the steps below.
 
 ## First Launch
 
 **Option A — Right-click method (recommended):**
-1. Drag Mac Tool to Applications
-2. Right-click `Mac Tool.app` → **Open**
+1. Drag Mobile 开发助手 to Applications
+2. Right-click `Mobile 开发助手.app` → **Open**
 3. Click **Open** in the Gatekeeper dialog
 
 **Option B — Terminal:**
 ```bash
-xattr -dr com.apple.quarantine "/Applications/Mac Tool.app"
-open "/Applications/Mac Tool.app"
+xattr -dr com.apple.quarantine "/Applications/Mobile 开发助手.app"
+open "/Applications/Mobile 开发助手.app"
 ```
 
 ## Full Disk Access (Required for Trash cleanup)
@@ -21,7 +21,7 @@ open "/Applications/Mac Tool.app"
 Some features (Trash category) require Full Disk Access:
 
 1. Open **System Settings → Privacy & Security → Full Disk Access**
-2. Click **+** and add **Mac Tool**
+2. Click **+** and add **Mobile 开发助手**
 3. Toggle it **on**
 
 > **After each app update:** The ad-hoc signature changes with every rebuild.

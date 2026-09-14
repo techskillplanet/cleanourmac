@@ -35,14 +35,32 @@ class CategorySummary {
     return switch (id) {
       'gradle_caches' ||
       'gradle_wrapper' ||
+      'android_cli_cache' ||
+      'android_studio_cache' ||
+      'dart_pub_hosted' ||
+      'dart_pub_git' ||
       'npm_cache' ||
+      'yarn_cache' ||
+      'yarn_xdg_cache' ||
+      'pnpm_store' ||
+      'pnpm_legacy_store' ||
+      'bun_cache' ||
+      'corepack_cache' ||
+      'deno_cache' ||
       'node_gyp' => Icons.code,
-      'cocoapods' || 'pip_cache' || 'homebrew' || 'playwright' => Icons.science,
+      'cocoapods' ||
+      'swiftpm_cache' ||
+      'swiftpm_repositories' ||
+      'carthage_cache' ||
+      'pip_cache' ||
+      'homebrew' => Icons.science,
+      'playwright' || 'cypress' => Icons.web_asset,
       'xcode_derived' ||
       'xcode_archives' ||
       'android_studio_backups' => Icons.build,
       'ios_simulators' => Icons.phone_iphone,
       'ios_runtimes' || 'ios_runtime_caches' => Icons.developer_mode,
+      'xcode_device_support' => Icons.phonelink_setup,
       'app_caches' => Icons.folder_open,
       'qq_updates' ||
       'app_support_caches' ||

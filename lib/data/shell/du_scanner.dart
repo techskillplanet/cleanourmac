@@ -13,15 +13,17 @@ class DuScanner {
 
   // Returns size in bytes for a single path.
   Future<int> sizeOf(String path) async {
-    if (!Directory(path).existsSync() && !File(path).existsSync()) return 0;
+    if (!await _exists(path)) return 0;
     final result = await _runner.run('du', ['-sk', path]);
     return _parseFirst(result.stdout);
   }
 
   // Returns a map of path -> sizeBytes for multiple paths at once.
   Future<Map<String, int>> sizeOfMultiple(List<String> paths) async {
-    final existing = paths.where((p) =>
-        Directory(p).existsSync() || File(p).existsSync()).toList();
+    final existing = <String>[];
+    for (final path in paths) {
+      if (await _exists(path)) existing.add(path);
+    }
     if (existing.isEmpty) return {};
 
     final result = await _runner.run('du', ['-sk', ...existing]);
@@ -29,22 +31,51 @@ class DuScanner {
   }
 
   // Returns child entries with their sizes (for contentsOnly targets).
-  Future<List<DuResult>> childSizes(String dirPath, {Set<String> skip = const {}}) async {
+  Future<List<DuResult>> childSizes(
+    String dirPath, {
+    Set<String> skip = const {},
+  }) async {
     final dir = Directory(dirPath);
-    if (!dir.existsSync()) return [];
+    if (!await _directoryExists(dir)) return [];
 
-    final children = dir
-        .listSync(followLinks: false)
+    final children = (await _listDirectory(dir))
         .where((e) => !skip.contains(e.uri.pathSegments.last))
         .map((e) => e.path)
         .toList();
     if (children.isEmpty) return [];
 
     final result = await _runner.run('du', ['-sk', ...children]);
-    return _parseAll(result.stdout)
-        .entries
-        .map((e) => DuResult(e.key, e.value ~/ 1024))
-        .toList();
+    return _parseAll(
+      result.stdout,
+    ).entries.map((e) => DuResult(e.key, e.value ~/ 1024)).toList();
+  }
+
+  Future<bool> _exists(String path) async {
+    if (await _directoryExists(Directory(path))) return true;
+    try {
+      return await File(path).exists().timeout(const Duration(seconds: 2));
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> _directoryExists(Directory directory) async {
+    try {
+      return await directory.exists().timeout(const Duration(seconds: 2));
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<List<FileSystemEntity>> _listDirectory(Directory directory) async {
+    try {
+      return await directory
+          .list(followLinks: false)
+          .timeout(const Duration(seconds: 3))
+          .toList();
+    } catch (_) {
+      return const [];
+    }
   }
 
   int _parseFirst(String stdout) {

@@ -78,16 +78,29 @@ class ScanRepository {
     'node-gyp',
     'ms-playwright',
     'npm',
+    'claude-cli-nodejs',
+    'Codex',
+    'TRAE SOLO CN',
+    '@opencode-aidesktop-updater',
+    'ai.opencode.desktop',
+    'ai.opencode.desktop.ShipIt',
+    'cn.trae.solo.app.ShipIt',
+    'com.openai.codex',
+    'com.todesktop.230313mzl4w4u92.ShipIt',
+    'Yarn',
+    'Cypress',
+    'org.swift.swiftpm',
+    'org.carthage.CarthageKit',
+    'Google',
+    'node',
+    'deno',
   };
 
   Future<List<ScanItem>> _scanChildren(CleanupTarget target) async {
     final dir = Directory(target.absolutePath);
-    if (!dir.existsSync()) return [];
+    if (!await _directoryExists(dir)) return [];
 
-    final children = dir
-        .listSync(followLinks: false)
-        .map((e) => e.path)
-        .toList();
+    final children = (await _listDirectory(dir)).map((e) => e.path).toList();
     if (children.isEmpty) return [];
 
     final sizes = await _du.sizeOfMultiple(children);
@@ -116,13 +129,13 @@ class ScanRepository {
 
   Future<List<ScanItem>> _scanMatchingChildren(CleanupTarget target) async {
     final dir = Directory(target.absolutePath);
-    if (!dir.existsSync()) return [];
+    if (!await _directoryExists(dir)) return [];
 
-    final children = dir
-        .listSync(followLinks: false)
+    final children = (await _listDirectory(dir))
         .where((entity) {
           final name = entity.path.split('/').last;
-          return target.includeChildSuffixes.any(name.endsWith);
+          return target.includeChildPrefixes.any(name.startsWith) ||
+              target.includeChildSuffixes.any(name.endsWith);
         })
         .map((entity) => entity.path)
         .toList();
@@ -145,7 +158,7 @@ class ScanRepository {
 
   Future<List<ScanItem>> _scanMatchingFiles(CleanupTarget target) async {
     final dir = Directory(target.absolutePath);
-    if (!dir.existsSync()) return [];
+    if (!await _directoryExists(dir)) return [];
 
     final paths = <String>[];
     try {
@@ -197,8 +210,9 @@ class ScanRepository {
             sizeBytes: d.sizeBytes,
             safety: SafetyLevel.caution,
             displayName: d.name,
-            detail:
-                '${d.runtime} · ${d.lastBootedAt == null ? 'never booted' : 'last used ${_formatDate(d.lastBootedAt!)}'}',
+            detailType: ScanItemDetailType.simulator,
+            detailValue: d.runtime,
+            detailDate: d.lastBootedAt,
             actionId: d.udid,
             selected: false, // default unselected for simulators
           ),
@@ -217,8 +231,9 @@ class ScanRepository {
             sizeBytes: runtime.sizeBytes,
             safety: SafetyLevel.caution,
             displayName: runtime.displayName,
-            detail:
-                'Build ${runtime.build}${runtime.lastUsedAt == null ? '' : ' · last used ${_formatDate(runtime.lastUsedAt!)}'}',
+            detailType: ScanItemDetailType.runtime,
+            detailValue: runtime.build,
+            detailDate: runtime.lastUsedAt,
             actionId: runtime.identifier,
             selected: false,
           ),
@@ -229,17 +244,15 @@ class ScanRepository {
 
   Future<List<ScanItem>> _scanRuntimeCaches(CleanupTarget target) async {
     final root = Directory(target.absolutePath);
-    if (!root.existsSync()) return [];
+    if (!await _directoryExists(root)) return [];
 
     final runtimes = await _simctl.listRuntimes();
     final cacheDirs = <String>[];
-    for (final hostDir
-        in root.listSync(followLinks: false).whereType<Directory>()) {
+    for (final hostDir in (await _listDirectory(root)).whereType<Directory>()) {
       cacheDirs.addAll(
-        hostDir
-            .listSync(followLinks: false)
-            .whereType<Directory>()
-            .map((directory) => directory.path),
+        (await _listDirectory(
+          hostDir,
+        )).whereType<Directory>().map((directory) => directory.path),
       );
     }
 
@@ -261,8 +274,8 @@ class ScanRepository {
           path: matches.first,
           sizeBytes: total,
           safety: SafetyLevel.caution,
-          displayName: '${runtime.displayName} dyld cache',
-          detail: 'Generated runtime cache · rebuilt automatically',
+          displayName: runtime.displayName,
+          detailType: ScanItemDetailType.runtimeCache,
           actionId: runtime.runtimeIdentifier,
           selected: false,
         ),
@@ -272,10 +285,23 @@ class ScanRepository {
     return items..sort((a, b) => b.sizeBytes.compareTo(a.sizeBytes));
   }
 
-  String _formatDate(DateTime date) {
-    final local = date.toLocal();
-    String twoDigits(int value) => value.toString().padLeft(2, '0');
-    return '${local.year}-${twoDigits(local.month)}-${twoDigits(local.day)}';
+  Future<bool> _directoryExists(Directory directory) async {
+    try {
+      return await directory.exists().timeout(const Duration(seconds: 2));
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<List<FileSystemEntity>> _listDirectory(Directory directory) async {
+    try {
+      return await directory
+          .list(followLinks: false)
+          .timeout(const Duration(seconds: 3))
+          .toList();
+    } catch (_) {
+      return const [];
+    }
   }
 
   Future<List<SimulatorDevice>> listSimulators() => _simctl.listDevices();

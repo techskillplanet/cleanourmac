@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds Mac Tool.app and packages it as a DMG.
+# Builds Mobile 开发助手.app and packages it as a DMG.
 # Requirements: Flutter, Xcode, hdiutil (macOS built-in)
 # Usage: bash scripts/build_dmg.sh
 
@@ -7,14 +7,14 @@ set -euo pipefail
 export LANG=en_US.UTF-8
 export DEVELOPER_DIR=/Volumes/outmount/Applications/Xcode.app/Contents/Developer
 
-APP_NAME="Mac Tool"
-BUNDLE_NAME="Mac Tool.app"
+APP_NAME="Mobile 开发助手"
+BUNDLE_NAME="Mobile 开发助手.app"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="$PROJECT_DIR/build"
 RELEASE_DIR="$BUILD_DIR/macos/Build/Products/Release"
 APP_PATH="$RELEASE_DIR/$BUNDLE_NAME"
-DMG_OUT="$BUILD_DIR/Mac-Tool.dmg"
+DMG_OUT="$BUILD_DIR/Mobile-Dev-Assistant.dmg"
 TMP_DMG="$BUILD_DIR/tmp.dmg"
 
 echo "==> Building Flutter release..."

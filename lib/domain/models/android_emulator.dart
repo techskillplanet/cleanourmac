@@ -5,6 +5,8 @@ class AndroidEmulator {
   final String? abi; // e.g. arm64-v8a, x86_64
   final bool isRunning;
   final String? serial; // adb serial (emulator-5554) when running
+  final bool isAvd;
+  final bool hardwareKeyboardEnabled;
 
   const AndroidEmulator({
     required this.name,
@@ -13,6 +15,8 @@ class AndroidEmulator {
     this.abi,
     this.isRunning = false,
     this.serial,
+    this.isAvd = true,
+    this.hardwareKeyboardEnabled = false,
   });
 
   String get detail {
@@ -23,12 +27,15 @@ class AndroidEmulator {
     return parts.isEmpty ? device : parts.join(' • ');
   }
 
-  AndroidEmulator copyWith({bool? isRunning, String? serial}) => AndroidEmulator(
+  AndroidEmulator copyWith({bool? isRunning, String? serial}) =>
+      AndroidEmulator(
         name: name,
         device: device,
         target: target,
         abi: abi,
         isRunning: isRunning ?? this.isRunning,
         serial: serial ?? this.serial,
+        isAvd: isAvd,
+        hardwareKeyboardEnabled: hardwareKeyboardEnabled,
       );
 }

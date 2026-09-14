@@ -1,8 +1,8 @@
 name: mac_tool
-description: "Developer-focused Mac disk cleaner — safely removes dev caches, simulators, and logs."
+description: "A local mobile development assistant for devices, simulators, ADB workflows, and developer storage."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.1.0+4
 
 environment:
   sdk: ^3.12.0
@@ -10,17 +10,22 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
   fl_chart: ^0.70.2
   shared_preferences: ^2.5.5
   intl: ^0.20.3
   path: ^1.9.0
-
+  grpc: ^5.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
 
 flutter:
+  generate: true
   uses-material-design: true
+  assets:
+    - assets/brand/

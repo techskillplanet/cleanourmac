@@ -9,7 +9,6 @@ class LargeFile {
   final int sizeBytes;
   final DateTime modifiedAt;
   final LargeFileSafety safety;
-  final String safetyReason;
   bool selected;
 
   LargeFile({
@@ -17,7 +16,6 @@ class LargeFile {
     required this.sizeBytes,
     required this.modifiedAt,
     required this.safety,
-    required this.safetyReason,
     this.selected = false,
   });
 
@@ -26,7 +24,6 @@ class LargeFile {
         sizeBytes: sizeBytes,
         modifiedAt: modifiedAt,
         safety: safety,
-        safetyReason: safetyReason,
         selected: selected ?? this.selected,
       );
 
@@ -121,12 +118,4 @@ LargeFileSafety classifyLargeFile(String path, String home) {
 
   // 其他一律 caution
   return LargeFileSafety.caution;
-}
-
-String safetyReasonFor(String path, LargeFileSafety safety) {
-  return switch (safety) {
-    LargeFileSafety.safe => '缓存/临时文件，可安全删除',
-    LargeFileSafety.caution => '请确认后删除',
-    LargeFileSafety.keep => '系统/SDK/源码文件，不建议删除',
-  };
 }

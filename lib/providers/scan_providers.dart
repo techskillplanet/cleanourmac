@@ -4,6 +4,10 @@ import '../domain/models/disk_usage.dart';
 import '../domain/models/scan_state.dart';
 import 'infra_providers.dart';
 
+bool shouldRetainScanSummary(CategorySummary summary) {
+  return summary.scanning || summary.error != null || summary.totalBytes > 0;
+}
+
 final diskUsageProvider = FutureProvider<DiskUsage>((ref) {
   return ref.watch(scanRepositoryProvider).getDiskUsage();
 });
@@ -34,18 +38,22 @@ class ScanNotifier extends StateNotifier<ScanState> {
 
     await for (final summary in stream) {
       if (_cancelled) break;
-      categories[summary.target.id] = summary;
+      if (shouldRetainScanSummary(summary)) {
+        categories[summary.target.id] = summary;
+      } else {
+        categories.remove(summary.target.id);
+      }
       if (!summary.scanning) count++;
       state = state.copyWith(
         categories: Map.from(categories),
         scannedCount: count,
-        currentLabel: summary.scanning ? summary.target.label : null,
+        currentTargetId: summary.scanning ? summary.target.id : null,
       );
     }
 
     state = state.copyWith(
       phase: _cancelled ? ScanPhase.cancelled : ScanPhase.done,
-      currentLabel: null,
+      clearCurrentTarget: true,
     );
   }
 

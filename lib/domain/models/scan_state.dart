@@ -7,14 +7,14 @@ class ScanState {
   final Map<String, CategorySummary> categories;
   final int scannedCount;
   final int totalCount;
-  final String? currentLabel;
+  final String? currentTargetId;
 
   const ScanState({
     this.phase = ScanPhase.idle,
     this.categories = const {},
     this.scannedCount = 0,
     this.totalCount = 0,
-    this.currentLabel,
+    this.currentTargetId,
   });
 
   double get progress => totalCount == 0 ? 0 : scannedCount / totalCount;
@@ -24,13 +24,15 @@ class ScanState {
     Map<String, CategorySummary>? categories,
     int? scannedCount,
     int? totalCount,
-    String? currentLabel,
-  }) =>
-      ScanState(
-        phase: phase ?? this.phase,
-        categories: categories ?? this.categories,
-        scannedCount: scannedCount ?? this.scannedCount,
-        totalCount: totalCount ?? this.totalCount,
-        currentLabel: currentLabel ?? this.currentLabel,
-      );
+    String? currentTargetId,
+    bool clearCurrentTarget = false,
+  }) => ScanState(
+    phase: phase ?? this.phase,
+    categories: categories ?? this.categories,
+    scannedCount: scannedCount ?? this.scannedCount,
+    totalCount: totalCount ?? this.totalCount,
+    currentTargetId: clearCurrentTarget
+        ? null
+        : currentTargetId ?? this.currentTargetId,
+  );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format/byte_format.dart';
+import '../../core/l10n/localization_extensions.dart';
 import '../../core/theme/safety_colors.dart';
 import '../../domain/models/cleanup_target.dart';
 import '../../domain/models/scan_item.dart';
@@ -17,8 +18,8 @@ class CategoryDetailPage extends ConsumerWidget {
 
     if (summary == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Category')),
-        body: const Center(child: Text('Not found')),
+        appBar: AppBar(title: Text(context.l10n.category)),
+        body: Center(child: Text(context.l10n.notFound)),
       );
     }
 
@@ -26,15 +27,20 @@ class CategoryDetailPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(summary.target.label),
+        title: Text(
+          context.l10n.cleanupTargetLabel(
+            summary.target.id,
+            fallback: summary.target.label,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => notifier.toggleCategory(categoryId, true),
-            child: const Text('Select All'),
+            child: Text(context.l10n.selectAll),
           ),
           TextButton(
             onPressed: () => notifier.toggleCategory(categoryId, false),
-            child: const Text('Deselect All'),
+            child: Text(context.l10n.deselectAll),
           ),
           const SizedBox(width: 8),
         ],
@@ -46,10 +52,12 @@ class CategoryDetailPage extends ConsumerWidget {
           const Divider(height: 1),
           Expanded(
             child: summary.items.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
-                      'No items found',
-                      style: TextStyle(color: Colors.grey),
+                      context.l10n.noItemsFound,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   )
                 : ListView.builder(
@@ -58,6 +66,7 @@ class CategoryDetailPage extends ConsumerWidget {
                     itemBuilder: (ctx, i) {
                       final item = summary.items[i];
                       return _ItemTile(
+                        categoryId: categoryId,
                         item: item,
                         onToggle: (v) =>
                             notifier.toggleItem(categoryId, item.path, v),
@@ -78,9 +87,9 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final safeColor = switch (summary.target.safety as SafetyLevel) {
-      SafetyLevel.safe => SafetyColors.safe,
-      SafetyLevel.caution => SafetyColors.caution,
-      SafetyLevel.danger => SafetyColors.danger,
+      SafetyLevel.safe => SafetyColors.safeFor(context),
+      SafetyLevel.caution => SafetyColors.cautionFor(context),
+      SafetyLevel.danger => SafetyColors.dangerFor(context),
     };
 
     return Padding(
@@ -99,11 +108,9 @@ class _Header extends StatelessWidget {
                 Icon(Icons.shield_rounded, size: 14, color: safeColor),
                 const SizedBox(width: 4),
                 Text(
-                  switch (summary.target.safety as SafetyLevel) {
-                    SafetyLevel.safe => 'Safe to clean',
-                    SafetyLevel.caution => 'Caution',
-                    SafetyLevel.danger => 'Danger',
-                  },
+                  context.l10n.safetyLabel(
+                    summary.target.safety as SafetyLevel,
+                  ),
                   style: TextStyle(
                     fontSize: 12,
                     color: safeColor,
@@ -118,15 +125,21 @@ class _Header extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                formatBytes(summary.totalBytes as int),
+                formatBytes(
+                  summary.totalBytes as int,
+                  locale: context.localeName,
+                ),
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
                 ),
               ),
               Text(
-                '${(summary.items as List).length} items',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                context.l10n.itemCount((summary.items as List).length),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -137,29 +150,39 @@ class _Header extends StatelessWidget {
 }
 
 class _ItemTile extends StatelessWidget {
+  final String categoryId;
   final ScanItem item;
   final ValueChanged<bool> onToggle;
 
-  const _ItemTile({required this.item, required this.onToggle});
+  const _ItemTile({
+    required this.categoryId,
+    required this.item,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final detail = context.l10n.localizedScanItemDetail(item);
+
     return CheckboxListTile(
       value: item.selected,
       onChanged: (v) => onToggle(v ?? false),
       title: Text(
-        item.name,
+        context.l10n.localizedScanItemName(categoryId, item),
         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        item.detail == null ? item.path : '${item.detail}\n${item.path}',
-        style: const TextStyle(fontSize: 11, color: Colors.grey),
-        maxLines: item.detail == null ? 1 : 2,
+        detail == null ? item.path : '$detail\n${item.path}',
+        style: TextStyle(
+          fontSize: 11,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        maxLines: detail == null ? 1 : 2,
         overflow: TextOverflow.ellipsis,
       ),
       secondary: Text(
-        formatBytes(item.sizeBytes),
+        formatBytes(item.sizeBytes, locale: context.localeName),
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
       ),
       controlAffinity: ListTileControlAffinity.leading,
