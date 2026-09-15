@@ -2,7 +2,9 @@
 
 面向移动研发团队的本地优先 macOS 工作台，把 Android、iOS、React Native 调测和开发环境清理放进一个安静、可控的工具里。
 
-[产品介绍网站](docs/index.html) · [下载 DMG](build/Mobile-Dev-Assistant.dmg) · [GitHub](https://github.com/techskillplanet/cleanourmac)
+[产品介绍网站](docs/index.html) · [下载 DMG](build/Mobile-Dev-Assistant.dmg) · [GitHub](https://github.com/techskillplanet/cleanourmac) · [Planet Components](https://studyplan.top/planet/)
+
+GitHub 当前数据：3 Stars · 0 Forks。欢迎提交 Issue、参与讨论和贡献代码。
 
 ![Mobile 开发助手浅色工作台](docs/assets/dashboard-light.png)
 

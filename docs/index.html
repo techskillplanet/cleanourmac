@@ -52,6 +52,7 @@
     .button.primary { color: #092126; background: var(--accent); border-color: var(--accent); }
     .button.primary:hover { background: var(--accent-strong); }
     .button.ghost { color: var(--text); background: rgba(255,255,255,.025); }
+    .button .arrow { color: var(--accent); font-size: 18px; line-height: 1; }
     .hero { padding: 92px 0 64px; }
     .hero-grid { display: grid; grid-template-columns: minmax(0, .84fr) minmax(0, 1.16fr); gap: 68px; align-items: center; }
     .eyebrow { color: var(--accent); text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 800; }
@@ -85,6 +86,15 @@
     .release { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; padding: 25px 28px; border: 1px solid rgba(140,203,211,.3); background: rgba(140,203,211,.08); border-radius: 11px; }
     .release h3 { margin: 0 0 4px; font-size: 22px; }
     .release p { margin: 0; color: var(--muted); }
+    .ecosystem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .ecosystem-card { display: flex; align-items: center; gap: 18px; padding: 24px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel); }
+    .ecosystem-icon { width: 46px; height: 46px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 12px; color: var(--accent); background: rgba(140,203,211,.1); font-size: 22px; font-weight: 800; }
+    .ecosystem-card h3 { margin: 0 0 4px; font-size: 20px; }
+    .ecosystem-card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .ecosystem-card .arrow { margin-left: auto; color: var(--accent); font-size: 22px; text-decoration: none; }
+    .repo-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+    .repo-stat { padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; }
+    .repo-stat strong { color: var(--text); }
     footer { padding: 34px 0 54px; color: var(--muted); font-size: 13px; }
     @media (max-width: 880px) {
       .hero-grid, .workflow { grid-template-columns: 1fr; }
@@ -96,6 +106,7 @@
       .nav a:not(.button) { display: none; }
       h1 { font-size: 46px; }
       .feature-grid, .gallery { grid-template-columns: 1fr; }
+      .ecosystem-grid { grid-template-columns: 1fr; }
       .release { grid-template-columns: 1fr; }
     }
   </style>
@@ -125,7 +136,7 @@
           <p>一款本地优先的 macOS 工具，集中管理 Android、iOS、React Native 和开发环境缓存。默认中文，数据留在本机。</p>
           <div class="actions">
             <a class="button primary" href="downloads/Mobile-Dev-Assistant.dmg">下载 macOS DMG</a>
-            <a class="button ghost" href="https://github.com/techskillplanet/cleanourmac">查看 GitHub</a>
+            <a class="button ghost" href="https://github.com/techskillplanet/cleanourmac">查看 GitHub <span class="arrow">↗</span></a>
           </div>
           <div class="hero-meta">
             <span class="meta">Android + ADB</span>
@@ -183,6 +194,37 @@ flutter run -d macos
 # build release DMG
 bash scripts/build_dmg.sh</code></pre>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ecosystem">
+      <div class="shell">
+        <div class="section-head">
+          <h2>和开源工具生态保持连接。</h2>
+          <p>查看项目进展，也可以了解我们在跨端组件和移动研发基础设施上的持续建设。</p>
+        </div>
+        <div class="ecosystem-grid">
+          <article class="ecosystem-card">
+            <div class="ecosystem-icon">GH</div>
+            <div>
+              <h3>GitHub 开源项目</h3>
+              <p>查看源码、提交 Issue、参与讨论和贡献代码。</p>
+              <div class="repo-stats">
+                <span class="repo-stat"><strong>3</strong> Stars</span>
+                <span class="repo-stat"><strong>0</strong> Forks</span>
+              </div>
+            </div>
+            <a class="arrow" href="https://github.com/techskillplanet/cleanourmac" aria-label="打开 GitHub 仓库">↗</a>
+          </article>
+          <article class="ecosystem-card">
+            <div class="ecosystem-icon">P</div>
+            <div>
+              <h3>Planet Components</h3>
+              <p>面向人和 AI 共用的跨端组件库，覆盖 Web、RN、Flutter、Android 和 iOS。</p>
+            </div>
+            <a class="arrow" href="https://studyplan.top/planet/" aria-label="查看 Planet Components">↗</a>
+          </article>
         </div>
       </div>
     </section>
