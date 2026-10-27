@@ -104,6 +104,26 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Android SDK missing state offers environment initialization', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('zh'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: Scaffold(
+          body: AndroidEmulatorPanel(sdkAvailable: false, emulators: []),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('初始化 Android 环境'), findsOneWidget);
+    expect(find.text('未找到 Android SDK'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('iOS simulators expose localized RN debug tools', (
     WidgetTester tester,
   ) async {

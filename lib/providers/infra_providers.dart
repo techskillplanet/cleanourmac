@@ -7,6 +7,7 @@ import '../data/shell/simctl_client.dart';
 import '../data/shell/find_scanner.dart';
 import '../data/shell/tcc_probe.dart';
 import '../data/shell/android_emulator_client.dart';
+import '../data/shell/android_environment_installer.dart';
 import '../data/shell/node_modules_scanner.dart';
 import '../data/repositories/node_modules_repository.dart';
 import '../data/repositories/android_emulator_repository.dart';
@@ -16,7 +17,12 @@ import '../data/repositories/clean_repository.dart';
 import '../data/repositories/simulator_repository.dart';
 import '../data/repositories/settings_repository.dart';
 
-final homeProvider = Provider<String>((_) => Platform.environment['HOME']!);
+final homeProvider = Provider<String>(
+  (_) =>
+      Platform.environment['HOME'] ??
+      Platform.environment['USERPROFILE'] ??
+      '.',
+);
 
 final shellRunnerProvider = Provider<ShellRunner>((_) => ShellRunner());
 
@@ -88,7 +94,10 @@ final androidEmulatorClientProvider = Provider<AndroidEmulatorClient>(
 );
 
 final androidEmulatorRepositoryProvider = Provider<AndroidEmulatorRepository>(
-  (ref) => AndroidEmulatorRepository(ref.watch(androidEmulatorClientProvider)),
+  (ref) => AndroidEmulatorRepository(
+    ref.watch(androidEmulatorClientProvider),
+    AndroidEnvironmentInstaller(),
+  ),
 );
 
 final nodeModulesScannerProvider = Provider<NodeModulesScanner>(

@@ -2414,6 +2414,54 @@ abstract class AppLocalizations {
   /// **'请安装 Android SDK 并设置 ANDROID_HOME，以管理 Android 模拟器。'**
   String get androidSdkNotFoundDescription;
 
+  /// No description provided for @initializeAndroidEnvironment.
+  ///
+  /// In zh, this message translates to:
+  /// **'初始化 Android 环境'**
+  String get initializeAndroidEnvironment;
+
+  /// No description provided for @androidEnvironmentSetupTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'初始化 Android 模拟器环境？'**
+  String get androidEnvironmentSetupTitle;
+
+  /// No description provided for @androidEnvironmentSetupDescription.
+  ///
+  /// In zh, this message translates to:
+  /// **'将下载 Android Command-line Tools、ADB、模拟器、Android 35 平台和系统镜像，默认安装到 {path}，并创建一个可启动的默认 AVD。下载约需数百 MB，继续前请确认网络可用。'**
+  String androidEnvironmentSetupDescription(Object path);
+
+  /// No description provided for @startSetup.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始初始化'**
+  String get startSetup;
+
+  /// No description provided for @androidEnvironmentPreparing.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在准备 Android 环境…'**
+  String get androidEnvironmentPreparing;
+
+  /// No description provided for @androidEnvironmentPackageDescription.
+  ///
+  /// In zh, this message translates to:
+  /// **'初始化会安装官方 Android SDK 工具和系统镜像，不会修改现有项目文件。'**
+  String get androidEnvironmentPackageDescription;
+
+  /// No description provided for @androidEnvironmentSetupFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'Android 环境初始化失败'**
+  String get androidEnvironmentSetupFailed;
+
+  /// No description provided for @androidEnvironmentSetupComplete.
+  ///
+  /// In zh, this message translates to:
+  /// **'Android 环境初始化完成，已创建默认模拟器。'**
+  String get androidEnvironmentSetupComplete;
+
   /// No description provided for @iosSimulatorSummary.
   ///
   /// In zh, this message translates to:
@@ -2796,6 +2844,252 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'主磁盘上各应用保存的日志文件。'**
   String get targetAppLogsDescription;
+
+  /// No description provided for @jwtTools.
+  ///
+  /// In zh, this message translates to:
+  /// **'JWT 工具'**
+  String get jwtTools;
+
+  /// No description provided for @jwtToolsSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'签发与校验移动端接口 Token'**
+  String get jwtToolsSubtitle;
+
+  /// No description provided for @jwtLocalOnly.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地处理'**
+  String get jwtLocalOnly;
+
+  /// No description provided for @jwtHeader.
+  ///
+  /// In zh, this message translates to:
+  /// **'Header'**
+  String get jwtHeader;
+
+  /// No description provided for @jwtAlgorithm.
+  ///
+  /// In zh, this message translates to:
+  /// **'签名算法'**
+  String get jwtAlgorithm;
+
+  /// No description provided for @jwtHeaderJson.
+  ///
+  /// In zh, this message translates to:
+  /// **'Header JSON'**
+  String get jwtHeaderJson;
+
+  /// No description provided for @jwtPayload.
+  ///
+  /// In zh, this message translates to:
+  /// **'Payload'**
+  String get jwtPayload;
+
+  /// No description provided for @jwtPayloadJson.
+  ///
+  /// In zh, this message translates to:
+  /// **'Payload JSON'**
+  String get jwtPayloadJson;
+
+  /// No description provided for @jwtPrivateKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'RSA 私钥 / HS 密钥'**
+  String get jwtPrivateKey;
+
+  /// No description provided for @jwtPrivateKeyHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'RS 算法用于签发；HS 算法用于签发和校验。密钥不会保存。'**
+  String get jwtPrivateKeyHint;
+
+  /// No description provided for @jwtPublicKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'RSA 公钥'**
+  String get jwtPublicKey;
+
+  /// No description provided for @jwtPublicKeyHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'RS 算法校验时使用。支持 PKCS#8 / PKCS#1 PEM。'**
+  String get jwtPublicKeyHint;
+
+  /// No description provided for @jwtGenerate.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成 JWT'**
+  String get jwtGenerate;
+
+  /// No description provided for @jwtRefreshTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'刷新时间戳'**
+  String get jwtRefreshTime;
+
+  /// No description provided for @jwtVerify.
+  ///
+  /// In zh, this message translates to:
+  /// **'校验 JWT'**
+  String get jwtVerify;
+
+  /// No description provided for @jwtOutput.
+  ///
+  /// In zh, this message translates to:
+  /// **'JWT 输出'**
+  String get jwtOutput;
+
+  /// No description provided for @jwtOutputPlaceholder.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成的 JWT 会显示在这里'**
+  String get jwtOutputPlaceholder;
+
+  /// No description provided for @jwtVerifyHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成或粘贴 JWT 后，点击“校验 JWT”检查签名和有效期。'**
+  String get jwtVerifyHint;
+
+  /// No description provided for @jwtSafetyTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地安全说明'**
+  String get jwtSafetyTitle;
+
+  /// No description provided for @jwtSafetyDescription.
+  ///
+  /// In zh, this message translates to:
+  /// **'所有 JSON、密钥和 Token 只在当前页面内处理，不写入配置文件或缓存。RSA 签名和验签通过本机 OpenSSL 完成。'**
+  String get jwtSafetyDescription;
+
+  /// No description provided for @jwtPrivateKeyRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'请填写私钥或密钥'**
+  String get jwtPrivateKeyRequired;
+
+  /// No description provided for @jwtPublicKeyRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'RS 算法校验需要填写 RSA 公钥'**
+  String get jwtPublicKeyRequired;
+
+  /// No description provided for @jwtGenerateFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成失败'**
+  String get jwtGenerateFailed;
+
+  /// No description provided for @jwtRefreshFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'刷新时间戳失败'**
+  String get jwtRefreshFailed;
+
+  /// No description provided for @jwtTimeRefreshed.
+  ///
+  /// In zh, this message translates to:
+  /// **'iat：{iat}\nexp：{exp}\njti：{jti}'**
+  String jwtTimeRefreshed(Object exp, Object iat, Object jti);
+
+  /// No description provided for @jwtTimeSkipped.
+  ///
+  /// In zh, this message translates to:
+  /// **'Payload 不是对象，无法检查时间字段。'**
+  String get jwtTimeSkipped;
+
+  /// No description provided for @jwtMissingIat.
+  ///
+  /// In zh, this message translates to:
+  /// **'Payload 没有 iat'**
+  String get jwtMissingIat;
+
+  /// No description provided for @jwtFutureIat.
+  ///
+  /// In zh, this message translates to:
+  /// **'iat 晚于当前时间'**
+  String get jwtFutureIat;
+
+  /// No description provided for @jwtValidIat.
+  ///
+  /// In zh, this message translates to:
+  /// **'iat 合法'**
+  String get jwtValidIat;
+
+  /// No description provided for @jwtMissingExp.
+  ///
+  /// In zh, this message translates to:
+  /// **'Payload 没有 exp'**
+  String get jwtMissingExp;
+
+  /// No description provided for @jwtValidExp.
+  ///
+  /// In zh, this message translates to:
+  /// **'exp 合法'**
+  String get jwtValidExp;
+
+  /// No description provided for @jwtCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'JWT 已复制到剪贴板'**
+  String get jwtCopied;
+
+  /// No description provided for @jwtMissingToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有 JWT，请先生成或粘贴 Token'**
+  String get jwtMissingToken;
+
+  /// No description provided for @jwtSignature.
+  ///
+  /// In zh, this message translates to:
+  /// **'签名校验'**
+  String get jwtSignature;
+
+  /// No description provided for @jwtPassed.
+  ///
+  /// In zh, this message translates to:
+  /// **'通过'**
+  String get jwtPassed;
+
+  /// No description provided for @jwtFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'失败'**
+  String get jwtFailed;
+
+  /// No description provided for @jwtExpires.
+  ///
+  /// In zh, this message translates to:
+  /// **'有效期至'**
+  String get jwtExpires;
+
+  /// No description provided for @jwtNotExpired.
+  ///
+  /// In zh, this message translates to:
+  /// **'Token 未过期'**
+  String get jwtNotExpired;
+
+  /// No description provided for @jwtExpired.
+  ///
+  /// In zh, this message translates to:
+  /// **'Token 已过期'**
+  String get jwtExpired;
+
+  /// No description provided for @jwtVerifyFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'校验失败'**
+  String get jwtVerifyFailed;
+
+  /// No description provided for @copy.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制'**
+  String get copy;
 }
 
 class _AppLocalizationsDelegate

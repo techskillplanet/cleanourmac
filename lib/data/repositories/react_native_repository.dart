@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:path/path.dart' as p;
+
 import '../../domain/models/react_native_project.dart';
 import '../shell/shell_escape.dart';
 import '../shell/shell_runner.dart';
@@ -145,6 +147,25 @@ class ReactNativeRepository {
   }
 
   Future<String?> chooseProject(String prompt) async {
+    if (Platform.isWindows) {
+      final script = r'''
+Add-Type -AssemblyName System.Windows.Forms
+$dialog = New-Object System.Windows.Forms.FolderBrowserDialog
+$dialog.Description = "Select a React Native project"
+if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+  [Console]::WriteLine($dialog.SelectedPath)
+}
+''';
+      final result = await _runner.run('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        script,
+      ]);
+      _throwIfFailed(result, fallback: 'Failed to choose project');
+      final path = result.stdout.trim();
+      return path.isEmpty ? null : path;
+    }
     final script =
         'set selectedFolder to choose folder with prompt '
         '${appleScriptStringLiteral(prompt)}\n'
@@ -256,7 +277,11 @@ class ReactNativeRepository {
       );
     }
 
-    await addApplication(ProjectOpenTarget.codexDesktop, const ['Codex.app']);
+    final windows = Platform.isWindows;
+    await addApplication(
+      ProjectOpenTarget.codexDesktop,
+      windows ? const ['codex.exe', 'Codex.exe'] : const ['Codex.app'],
+    );
     if (await _findCodexCli() != null) {
       options.add(
         ProjectOpenOption(
@@ -265,26 +290,49 @@ class ReactNativeRepository {
         ),
       );
     }
-    await addApplication(ProjectOpenTarget.cursor, const ['Cursor.app']);
-    await addApplication(ProjectOpenTarget.visualStudioCode, const [
-      'Visual Studio Code.app',
-      'Code.app',
+    await addApplication(
+      ProjectOpenTarget.cursor,
+      windows ? const ['cursor.exe', 'Cursor.exe'] : const ['Cursor.app'],
+    );
+    await addApplication(ProjectOpenTarget.visualStudioCode, [
+      if (!windows) 'Visual Studio Code.app',
+      if (!windows) 'Code.app',
+      if (windows) 'Code.exe',
     ]);
-    await addApplication(ProjectOpenTarget.qoder, const ['Qoder.app']);
-    await addApplication(ProjectOpenTarget.trae, const [
-      'TRAE SOLO CN.app',
-      'Trae.app',
-      'Trae CN.app',
+    await addApplication(
+      ProjectOpenTarget.qoder,
+      windows ? const ['Qoder.exe'] : const ['Qoder.app'],
+    );
+    await addApplication(ProjectOpenTarget.trae, [
+      if (!windows) 'TRAE SOLO CN.app',
+      if (!windows) 'Trae.app',
+      if (!windows) 'Trae CN.app',
+      if (windows) 'Trae.exe',
     ]);
-    await addApplication(ProjectOpenTarget.webStorm, const ['WebStorm.app']);
-    await addApplication(ProjectOpenTarget.zed, const ['Zed.app']);
-    await addApplication(ProjectOpenTarget.windsurf, const ['Windsurf.app']);
+    await addApplication(
+      ProjectOpenTarget.webStorm,
+      windows
+          ? const ['webstorm64.exe', 'WebStorm.exe']
+          : const ['WebStorm.app'],
+    );
+    await addApplication(
+      ProjectOpenTarget.zed,
+      windows ? const ['zed.exe', 'Zed.exe'] : const ['Zed.app'],
+    );
+    await addApplication(
+      ProjectOpenTarget.windsurf,
+      windows ? const ['Windsurf.exe'] : const ['Windsurf.app'],
+    );
 
     final androidProject = await _findAndroidProject(project.path);
     if (androidProject != null) {
-      await addApplication(ProjectOpenTarget.androidStudio, const [
-        'Android Studio.app',
-      ], openPath: androidProject);
+      await addApplication(
+        ProjectOpenTarget.androidStudio,
+        windows
+            ? const ['studio64.exe', 'studio.exe']
+            : const ['Android Studio.app'],
+        openPath: androidProject,
+      );
     }
 
     final xcodeProject = await _findXcodeProject(project.path);
@@ -321,6 +369,14 @@ class ReactNativeRepository {
 
     if (target == ProjectOpenTarget.terminal) {
       final shell = Platform.environment['SHELL'] ?? '/bin/zsh';
+      if (Platform.isWindows) {
+        await _openTerminal(
+          project.path,
+          'cmd.exe',
+          'Terminal · ${project.name}',
+        );
+        return;
+      }
       await _openTerminal(
         project.path,
         '${shellQuote(shell)} -l',
@@ -339,14 +395,20 @@ class ReactNativeRepository {
       return;
     }
 
-    final args = <String>[
-      if (selected.applicationPath != null) ...[
-        '-a',
-        selected.applicationPath!,
-      ],
-      selected.openPath,
-    ];
-    final result = await _runner.run('/usr/bin/open', args);
+    final result = Platform.isWindows
+        ? await _runner.run(
+            selected.applicationPath ?? 'explorer.exe',
+            selected.applicationPath == null
+                ? [selected.openPath]
+                : [selected.openPath],
+          )
+        : await _runner.run('/usr/bin/open', [
+            if (selected.applicationPath != null) ...[
+              '-a',
+              selected.applicationPath!,
+            ],
+            selected.openPath,
+          ]);
     _throwIfFailed(result, fallback: 'Failed to open project');
   }
 
@@ -405,7 +467,10 @@ class ReactNativeRepository {
     for (final root in roots) {
       for (final name in names) {
         final candidate = Directory('$root/$name');
-        if (await _directoryExists(candidate)) return candidate.path;
+        if (await _directoryExists(candidate) ||
+            await _fileExists(File(candidate.path))) {
+          return candidate.path;
+        }
       }
     }
     return null;
@@ -430,6 +495,16 @@ class ReactNativeRepository {
   Future<List<String>> _applicationRoots() async {
     final override = _applicationRootsOverride;
     if (override != null) return override;
+    if (Platform.isWindows) {
+      return [
+        if (Platform.environment['ProgramFiles'] != null)
+          Platform.environment['ProgramFiles']!,
+        if (Platform.environment['LOCALAPPDATA'] != null)
+          p.join(Platform.environment['LOCALAPPDATA']!, 'Programs'),
+        if (Platform.environment['ProgramW6432'] != null)
+          Platform.environment['ProgramW6432']!,
+      ];
+    }
     final roots = <String>['/Applications', '$_home/Applications'];
     final volumes = Directory('/Volumes');
     if (await _directoryExists(volumes)) {
@@ -491,7 +566,7 @@ class ReactNativeRepository {
       }
       visitedDirectories++;
       for (final entity in await _listDirectory(directory)) {
-        final name = entity.path.split('/').last;
+        final name = p.basename(entity.path);
         if (name == 'node_modules' ||
             name == 'Pods' ||
             name == 'build' ||
@@ -564,7 +639,7 @@ class ReactNativeRepository {
       for (final child in (await _listDirectory(
         directory,
       )).whereType<Directory>()) {
-        final name = child.path.split('/').last;
+        final name = p.basename(child.path);
         if (name.startsWith('.') ||
             name == 'node_modules' ||
             name == 'build' ||
@@ -624,6 +699,14 @@ class ReactNativeRepository {
     String command,
     String title,
   ) async {
+    if (Platform.isWindows) {
+      final windowsCommand =
+          'start "" cmd.exe /k "cd /d ${workingDirectory.replaceAll('"', '""')}'
+          ' && $command"';
+      final result = await _runner.run('cmd.exe', ['/c', windowsCommand]);
+      _throwIfFailed(result, fallback: 'Failed to open Windows Terminal');
+      return;
+    }
     final titledCommand =
         "printf '\\033]0;%s\\007' ${shellQuote(title)}; "
         'cd ${shellQuote(workingDirectory)} && exec $command';

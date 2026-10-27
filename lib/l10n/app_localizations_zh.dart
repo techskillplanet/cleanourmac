@@ -1347,6 +1347,33 @@ class AppLocalizationsZh extends AppLocalizations {
       '请安装 Android SDK 并设置 ANDROID_HOME，以管理 Android 模拟器。';
 
   @override
+  String get initializeAndroidEnvironment => '初始化 Android 环境';
+
+  @override
+  String get androidEnvironmentSetupTitle => '初始化 Android 模拟器环境？';
+
+  @override
+  String androidEnvironmentSetupDescription(Object path) {
+    return '将下载 Android Command-line Tools、ADB、模拟器、Android 35 平台和系统镜像，默认安装到 $path，并创建一个可启动的默认 AVD。下载约需数百 MB，继续前请确认网络可用。';
+  }
+
+  @override
+  String get startSetup => '开始初始化';
+
+  @override
+  String get androidEnvironmentPreparing => '正在准备 Android 环境…';
+
+  @override
+  String get androidEnvironmentPackageDescription =>
+      '初始化会安装官方 Android SDK 工具和系统镜像，不会修改现有项目文件。';
+
+  @override
+  String get androidEnvironmentSetupFailed => 'Android 环境初始化失败';
+
+  @override
+  String get androidEnvironmentSetupComplete => 'Android 环境初始化完成，已创建默认模拟器。';
+
+  @override
   String iosSimulatorSummary(Object count, Object size) {
     return '$count 台模拟器 · 共 $size';
   }
@@ -1560,4 +1587,130 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get targetAppLogsDescription => '主磁盘上各应用保存的日志文件。';
+
+  @override
+  String get jwtTools => 'JWT 工具';
+
+  @override
+  String get jwtToolsSubtitle => '签发与校验移动端接口 Token';
+
+  @override
+  String get jwtLocalOnly => '本地处理';
+
+  @override
+  String get jwtHeader => 'Header';
+
+  @override
+  String get jwtAlgorithm => '签名算法';
+
+  @override
+  String get jwtHeaderJson => 'Header JSON';
+
+  @override
+  String get jwtPayload => 'Payload';
+
+  @override
+  String get jwtPayloadJson => 'Payload JSON';
+
+  @override
+  String get jwtPrivateKey => 'RSA 私钥 / HS 密钥';
+
+  @override
+  String get jwtPrivateKeyHint => 'RS 算法用于签发；HS 算法用于签发和校验。密钥不会保存。';
+
+  @override
+  String get jwtPublicKey => 'RSA 公钥';
+
+  @override
+  String get jwtPublicKeyHint => 'RS 算法校验时使用。支持 PKCS#8 / PKCS#1 PEM。';
+
+  @override
+  String get jwtGenerate => '生成 JWT';
+
+  @override
+  String get jwtRefreshTime => '刷新时间戳';
+
+  @override
+  String get jwtVerify => '校验 JWT';
+
+  @override
+  String get jwtOutput => 'JWT 输出';
+
+  @override
+  String get jwtOutputPlaceholder => '生成的 JWT 会显示在这里';
+
+  @override
+  String get jwtVerifyHint => '生成或粘贴 JWT 后，点击“校验 JWT”检查签名和有效期。';
+
+  @override
+  String get jwtSafetyTitle => '本地安全说明';
+
+  @override
+  String get jwtSafetyDescription =>
+      '所有 JSON、密钥和 Token 只在当前页面内处理，不写入配置文件或缓存。RSA 签名和验签通过本机 OpenSSL 完成。';
+
+  @override
+  String get jwtPrivateKeyRequired => '请填写私钥或密钥';
+
+  @override
+  String get jwtPublicKeyRequired => 'RS 算法校验需要填写 RSA 公钥';
+
+  @override
+  String get jwtGenerateFailed => '生成失败';
+
+  @override
+  String get jwtRefreshFailed => '刷新时间戳失败';
+
+  @override
+  String jwtTimeRefreshed(Object exp, Object iat, Object jti) {
+    return 'iat：$iat\nexp：$exp\njti：$jti';
+  }
+
+  @override
+  String get jwtTimeSkipped => 'Payload 不是对象，无法检查时间字段。';
+
+  @override
+  String get jwtMissingIat => 'Payload 没有 iat';
+
+  @override
+  String get jwtFutureIat => 'iat 晚于当前时间';
+
+  @override
+  String get jwtValidIat => 'iat 合法';
+
+  @override
+  String get jwtMissingExp => 'Payload 没有 exp';
+
+  @override
+  String get jwtValidExp => 'exp 合法';
+
+  @override
+  String get jwtCopied => 'JWT 已复制到剪贴板';
+
+  @override
+  String get jwtMissingToken => '还没有 JWT，请先生成或粘贴 Token';
+
+  @override
+  String get jwtSignature => '签名校验';
+
+  @override
+  String get jwtPassed => '通过';
+
+  @override
+  String get jwtFailed => '失败';
+
+  @override
+  String get jwtExpires => '有效期至';
+
+  @override
+  String get jwtNotExpired => 'Token 未过期';
+
+  @override
+  String get jwtExpired => 'Token 已过期';
+
+  @override
+  String get jwtVerifyFailed => '校验失败';
+
+  @override
+  String get copy => '复制';
 }

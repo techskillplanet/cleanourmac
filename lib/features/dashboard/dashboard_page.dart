@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/byte_format.dart';
 import '../../core/l10n/localization_extensions.dart';
+import '../../core/platform/platform_capabilities.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_page_title.dart';
 import '../../domain/models/category_summary.dart';
@@ -36,6 +37,7 @@ class DashboardPage extends ConsumerWidget {
     final iosCount = iosDevices.isLoading
         ? null
         : iosDevices.valueOrNull?.length ?? 0;
+    final showIos = PlatformCapabilities.supportsIosTooling;
 
     return Scaffold(
       appBar: AppBar(
@@ -62,6 +64,7 @@ class DashboardPage extends ConsumerWidget {
                 androidCount: androidCount,
                 iosCount: iosCount,
                 recoverable: recoverable,
+                showIos: showIos,
               ),
               const SizedBox(height: 18),
               _StorageCard(disk: disk, recoverable: recoverable),
@@ -221,18 +224,22 @@ class _StatusMetrics extends StatelessWidget {
   final int? androidCount;
   final int? iosCount;
   final int recoverable;
+  final bool showIos;
 
   const _StatusMetrics({
     required this.androidCount,
     required this.iosCount,
     required this.recoverable,
+    required this.showIos,
   });
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final cardWidth = (constraints.maxWidth - 20) / 3;
+        final cardCount = showIos ? 3 : 2;
+        final cardWidth =
+            (constraints.maxWidth - (cardCount - 1) * 10) / cardCount;
         return Row(
           children: [
             SizedBox(
@@ -244,16 +251,18 @@ class _StatusMetrics extends StatelessWidget {
                 label: context.l10n.androidEmulators,
               ),
             ),
-            const SizedBox(width: 10),
-            SizedBox(
-              width: cardWidth,
-              child: _MetricCard(
-                icon: Icons.phone_iphone_rounded,
-                color: AppPalette.ios,
-                value: iosCount?.toString() ?? '—',
-                label: context.l10n.iosSimulators,
+            if (showIos) ...[
+              const SizedBox(width: 10),
+              SizedBox(
+                width: cardWidth,
+                child: _MetricCard(
+                  icon: Icons.phone_iphone_rounded,
+                  color: AppPalette.ios,
+                  value: iosCount?.toString() ?? '—',
+                  label: context.l10n.iosSimulators,
+                ),
               ),
-            ),
+            ],
             const SizedBox(width: 10),
             SizedBox(
               width: cardWidth,

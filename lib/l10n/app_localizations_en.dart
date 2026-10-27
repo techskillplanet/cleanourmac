@@ -1388,6 +1388,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'Install the Android SDK and set ANDROID_HOME to manage emulators.';
 
   @override
+  String get initializeAndroidEnvironment => 'Initialize Android Environment';
+
+  @override
+  String get androidEnvironmentSetupTitle =>
+      'Initialize Android Emulator Environment?';
+
+  @override
+  String androidEnvironmentSetupDescription(Object path) {
+    return 'This downloads Android Command-line Tools, ADB, the emulator, Android 35, and a system image to $path, then creates a bootable default AVD. The download may be several hundred MB; make sure the network is available.';
+  }
+
+  @override
+  String get startSetup => 'Start Setup';
+
+  @override
+  String get androidEnvironmentPreparing => 'Preparing Android environment…';
+
+  @override
+  String get androidEnvironmentPackageDescription =>
+      'The setup installs official Android SDK tools and a system image. Existing project files are not changed.';
+
+  @override
+  String get androidEnvironmentSetupFailed =>
+      'Android environment setup failed';
+
+  @override
+  String get androidEnvironmentSetupComplete =>
+      'Android environment setup complete. A default emulator was created.';
+
+  @override
   String iosSimulatorSummary(Object count, Object size) {
     return '$count simulators · $size total';
   }
@@ -1620,4 +1650,134 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get targetAppLogsDescription =>
       'Per-app log files stored on the primary disk.';
+
+  @override
+  String get jwtTools => 'JWT Tools';
+
+  @override
+  String get jwtToolsSubtitle => 'Issue and verify mobile API tokens';
+
+  @override
+  String get jwtLocalOnly => 'Local only';
+
+  @override
+  String get jwtHeader => 'Header';
+
+  @override
+  String get jwtAlgorithm => 'Signing algorithm';
+
+  @override
+  String get jwtHeaderJson => 'Header JSON';
+
+  @override
+  String get jwtPayload => 'Payload';
+
+  @override
+  String get jwtPayloadJson => 'Payload JSON';
+
+  @override
+  String get jwtPrivateKey => 'RSA private key / HS secret';
+
+  @override
+  String get jwtPrivateKeyHint =>
+      'Used to sign RS tokens, or to sign and verify HS tokens. Keys are never saved.';
+
+  @override
+  String get jwtPublicKey => 'RSA public key';
+
+  @override
+  String get jwtPublicKeyHint =>
+      'Used to verify RS tokens. PKCS#8 and PKCS#1 PEM are supported.';
+
+  @override
+  String get jwtGenerate => 'Generate JWT';
+
+  @override
+  String get jwtRefreshTime => 'Refresh timestamps';
+
+  @override
+  String get jwtVerify => 'Verify JWT';
+
+  @override
+  String get jwtOutput => 'JWT output';
+
+  @override
+  String get jwtOutputPlaceholder => 'The generated JWT will appear here';
+
+  @override
+  String get jwtVerifyHint =>
+      'Generate or paste a JWT, then verify its signature and expiration.';
+
+  @override
+  String get jwtSafetyTitle => 'Local safety';
+
+  @override
+  String get jwtSafetyDescription =>
+      'JSON, keys, and tokens stay in this page and are not written to settings or caches. RSA signing and verification use the local OpenSSL binary.';
+
+  @override
+  String get jwtPrivateKeyRequired => 'Enter a private key or secret';
+
+  @override
+  String get jwtPublicKeyRequired => 'RSA verification requires a public key';
+
+  @override
+  String get jwtGenerateFailed => 'Generation failed';
+
+  @override
+  String get jwtRefreshFailed => 'Timestamp refresh failed';
+
+  @override
+  String jwtTimeRefreshed(Object exp, Object iat, Object jti) {
+    return 'iat: $iat\nexp: $exp\njti: $jti';
+  }
+
+  @override
+  String get jwtTimeSkipped =>
+      'Payload is not an object, so time fields cannot be checked.';
+
+  @override
+  String get jwtMissingIat => 'Payload has no iat';
+
+  @override
+  String get jwtFutureIat => 'iat is in the future';
+
+  @override
+  String get jwtValidIat => 'iat is valid';
+
+  @override
+  String get jwtMissingExp => 'Payload has no exp';
+
+  @override
+  String get jwtValidExp => 'exp is valid';
+
+  @override
+  String get jwtCopied => 'JWT copied to clipboard';
+
+  @override
+  String get jwtMissingToken => 'No JWT yet. Generate or paste a token first.';
+
+  @override
+  String get jwtSignature => 'Signature';
+
+  @override
+  String get jwtPassed => 'passed';
+
+  @override
+  String get jwtFailed => 'failed';
+
+  @override
+  String get jwtExpires => 'Expires';
+
+  @override
+  String get jwtNotExpired => 'Token is not expired';
+
+  @override
+  String get jwtExpired => 'Token is expired';
+
+  @override
+  String get jwtVerifyFailed => 'Verification failed';
+
+  @override
+  String get copy => 'Copy';
 }

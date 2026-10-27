@@ -1,12 +1,22 @@
 import '../../domain/models/android_emulator.dart';
 import '../../domain/models/android_emulator_config.dart';
+import '../../domain/models/android_environment_setup.dart';
 import '../shell/android_emulator_client.dart';
+import '../shell/android_environment_installer.dart';
 
 class AndroidEmulatorRepository {
   final AndroidEmulatorClient _client;
-  AndroidEmulatorRepository(this._client);
+  final AndroidEnvironmentInstaller _installer;
+
+  AndroidEmulatorRepository(this._client, this._installer);
 
   bool get isAvailable => _client.isAvailable;
+
+  String get defaultSdkRoot => _installer.defaultSdkRoot;
+
+  Future<AndroidEnvironmentSetupResult> initializeEnvironment({
+    void Function(String message)? onProgress,
+  }) => _installer.initialize(onProgress: onProgress);
 
   Future<List<AndroidEmulator>> list() => _client.list();
 

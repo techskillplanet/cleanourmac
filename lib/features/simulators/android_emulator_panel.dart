@@ -5,6 +5,8 @@ import '../../core/l10n/localization_extensions.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/shell/android_emulator_client.dart'
     show AndroidEmulatorLaunchException;
+import '../../data/shell/android_environment_installer.dart'
+    show AndroidEnvironmentSetupException;
 import '../../domain/models/android_emulator.dart';
 import '../../domain/models/android_emulator_config.dart';
 import '../../providers/android_emulator_providers.dart';
@@ -32,11 +34,17 @@ class _AndroidEmulatorPanelState extends ConsumerState<AndroidEmulatorPanel> {
   bool _restartingAdb = false;
   bool _checkingConfiguration = false;
   bool _repairingConfiguration = false;
+  bool _initializingEnvironment = false;
+  String? _initializationProgress;
 
   @override
   Widget build(BuildContext context) {
     if (!widget.sdkAvailable) {
-      return const _NoSdk();
+      return _NoSdk(
+        initializing: _initializingEnvironment,
+        progress: _initializationProgress,
+        onInitialize: _initializeEnvironment,
+      );
     }
 
     final runningCount = widget.emulators
@@ -185,6 +193,62 @@ class _AndroidEmulatorPanelState extends ConsumerState<AndroidEmulatorPanel> {
       return;
     }
     await showAndroidEmulatorConfigRepairResult(context, result!);
+  }
+
+  Future<void> _initializeEnvironment() async {
+    final repository = ref.read(androidEmulatorRepositoryProvider);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.androidEnvironmentSetupTitle),
+        content: Text(
+          context.l10n.androidEnvironmentSetupDescription(
+            repository.defaultSdkRoot,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(context.l10n.startSetup),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _initializingEnvironment = true;
+      _initializationProgress = context.l10n.androidEnvironmentPreparing;
+    });
+    Object? error;
+    try {
+      await repository.initializeEnvironment(
+        onProgress: (message) {
+          if (mounted) setState(() => _initializationProgress = message);
+        },
+      );
+    } catch (caught) {
+      error = caught;
+    }
+    if (!mounted) return;
+
+    setState(() {
+      _initializingEnvironment = false;
+      _initializationProgress = null;
+    });
+    ref.invalidate(androidEmulatorsProvider);
+    if (error != null) {
+      final logPath = error is AndroidEnvironmentSetupException
+          ? '\n${error.logPath}'
+          : '';
+      _showError(context.l10n.androidEnvironmentSetupFailed, '$error$logPath');
+    } else {
+      _showMessage(context.l10n.androidEnvironmentSetupComplete);
+    }
   }
 
   Future<void> _handleAdbAction(
@@ -1334,7 +1398,15 @@ class _AndroidEmptyState extends StatelessWidget {
 }
 
 class _NoSdk extends StatelessWidget {
-  const _NoSdk();
+  final bool initializing;
+  final String? progress;
+  final VoidCallback onInitialize;
+
+  const _NoSdk({
+    required this.initializing,
+    required this.progress,
+    required this.onInitialize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1360,6 +1432,42 @@ class _NoSdk extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 18),
+            FilledButton.icon(
+              onPressed: initializing ? null : onInitialize,
+              icon: initializing
+                  ? const SizedBox(
+                      width: 17,
+                      height: 17,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.download_for_offline_outlined, size: 18),
+              label: Text(
+                initializing
+                    ? context.l10n.androidEnvironmentPreparing
+                    : context.l10n.initializeAndroidEnvironment,
+              ),
+            ),
+            if (progress != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                progress!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+            const SizedBox(height: 10),
+            Text(
+              context.l10n.androidEnvironmentPackageDescription,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 11,
               ),
             ),
           ],

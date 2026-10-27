@@ -6,9 +6,9 @@ import '../dashboard/dashboard_page.dart';
 import '../scanner/scan_page.dart';
 import '../large_files/large_files_page.dart';
 import '../simulators/simulator_page.dart';
-import '../node_modules/node_modules_page.dart';
 import '../project_caches/project_cache_page.dart';
 import '../settings/settings_page.dart';
+import '../jwt/jwt_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -24,16 +24,16 @@ class _AppShellState extends State<AppShell> {
   Widget _createPage(int index) {
     return switch (index) {
       0 => DashboardPage(
-        onOpenDevices: () => _selectPage(1),
-        onStartScan: () => _selectPage(3),
+        onOpenDevices: () => _selectPage(2),
+        onStartScan: () => _selectPage(4),
       ),
-      1 => const SimulatorPage(),
-      2 => const ReactNativePage(),
-      3 => const ScanPage(),
-      4 => const ProjectCachePage(),
-      5 => const AiAgentCachePage(),
-      6 => const LargeFilesPage(),
-      7 => const NodeModulesPage(),
+      1 => const JwtPage(),
+      2 => const SimulatorPage(),
+      3 => const ReactNativePage(),
+      4 => const ScanPage(),
+      5 => const ProjectCachePage(),
+      6 => const AiAgentCachePage(),
+      7 => const LargeFilesPage(),
       8 => const SettingsPage(),
       _ => const SizedBox.shrink(),
     };

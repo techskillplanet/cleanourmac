@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n/localization_extensions.dart';
+import '../../core/platform/platform_capabilities.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_page_title.dart';
 import '../../core/widgets/react_native_icon.dart';
@@ -116,11 +117,16 @@ class _ReactNativePageState extends ConsumerState<ReactNativePage> {
                   onRefresh: notifier.refreshMetro,
                 ),
                 const SizedBox(height: 14),
-                _CommandCard(project: project, onRun: _runScript),
+                _CommandCard(
+                  project: project,
+                  onRun: _runScript,
+                  supportsIos: PlatformCapabilities.supportsIosTooling,
+                ),
                 const SizedBox(height: 14),
                 _DeviceToolsCard(
                   runningAndroid: runningAndroid,
                   bootedIos: bootedIos,
+                  supportsIos: PlatformCapabilities.supportsIosTooling,
                   selectedAndroidSerial: _androidSerial,
                   selectedIosUdid: _iosUdid,
                   onAndroidSelected: (serial) =>
@@ -550,12 +556,22 @@ class _CommandCard extends StatelessWidget {
 
   final ReactNativeProject project;
   final ValueChanged<String> onRun;
+  final bool supportsIos;
 
-  const _CommandCard({required this.project, required this.onRun});
+  const _CommandCard({
+    required this.project,
+    required this.onRun,
+    required this.supportsIos,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final available = commonScripts.where(project.hasScript).toList();
+    final available = commonScripts.where((script) {
+      if (!supportsIos && (script == 'ios' || script == 'runios')) {
+        return false;
+      }
+      return project.hasScript(script);
+    }).toList();
     final remaining =
         project.scripts.keys
             .where((script) => script != 'start' && !available.contains(script))
@@ -643,6 +659,7 @@ class _CommandCard extends StatelessWidget {
 class _DeviceToolsCard extends StatelessWidget {
   final List<AndroidEmulator> runningAndroid;
   final List<SimulatorDevice> bootedIos;
+  final bool supportsIos;
   final String? selectedAndroidSerial;
   final String? selectedIosUdid;
   final ValueChanged<String?> onAndroidSelected;
@@ -656,6 +673,7 @@ class _DeviceToolsCard extends StatelessWidget {
   const _DeviceToolsCard({
     required this.runningAndroid,
     required this.bootedIos,
+    required this.supportsIos,
     required this.selectedAndroidSerial,
     required this.selectedIosUdid,
     required this.onAndroidSelected,
@@ -717,29 +735,31 @@ class _DeviceToolsCard extends StatelessWidget {
                 (context.l10n.androidReload, onAndroidReload),
               ],
             ),
-            const Divider(height: 26),
-            _DeviceToolRow(
-              icon: Icons.phone_iphone_rounded,
-              label: 'iOS',
-              devices: bootedIos
-                  .map((device) => MapEntry(device.udid, device.name))
-                  .toList(),
-              selected: iosValue,
-              emptyLabel: context.l10n.noBootedIos,
-              onSelected: onIosSelected,
-              actions: [
-                (context.l10n.iosDevMenu, onIosDevMenu),
-                (context.l10n.iosReload, onIosReload),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              context.l10n.iosRnShortcutHint,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 10.5,
+            if (supportsIos) ...[
+              const Divider(height: 26),
+              _DeviceToolRow(
+                icon: Icons.phone_iphone_rounded,
+                label: 'iOS',
+                devices: bootedIos
+                    .map((device) => MapEntry(device.udid, device.name))
+                    .toList(),
+                selected: iosValue,
+                emptyLabel: context.l10n.noBootedIos,
+                onSelected: onIosSelected,
+                actions: [
+                  (context.l10n.iosDevMenu, onIosDevMenu),
+                  (context.l10n.iosReload, onIosReload),
+                ],
               ),
-            ),
+              const SizedBox(height: 10),
+              Text(
+                context.l10n.iosRnShortcutHint,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: 10.5,
+                ),
+              ),
+            ],
           ],
         ),
       ),

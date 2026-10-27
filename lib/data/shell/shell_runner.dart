@@ -15,12 +15,7 @@ class ShellRunner {
     List<String> args, {
     Map<String, String>? environment,
   }) async {
-    final env = {
-      'HOME': Platform.environment['HOME'] ?? '',
-      'LANG': 'en_US.UTF-8',
-      'PATH': '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:${Platform.environment['PATH'] ?? ''}',
-      ...?environment,
-    };
+    final env = _environment(environment);
 
     final proc = await Process.start(executable, args, environment: env);
     final out = StringBuffer();
@@ -42,17 +37,14 @@ class ShellRunner {
     Map<String, String>? environment,
     void Function(Process)? onProcess,
   }) async* {
-    final env = {
-      'HOME': Platform.environment['HOME'] ?? '',
-      'LANG': 'en_US.UTF-8',
-      'PATH': '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:${Platform.environment['PATH'] ?? ''}',
-      ...?environment,
-    };
+    final env = _environment(environment);
 
     final proc = await Process.start(executable, args, environment: env);
     onProcess?.call(proc);
 
-    await for (final chunk in proc.stdout.transform(const SystemEncoding().decoder)) {
+    await for (final chunk in proc.stdout.transform(
+      const SystemEncoding().decoder,
+    )) {
       for (final line in chunk.split('\n')) {
         final trimmed = line.trim();
         if (trimmed.isNotEmpty) yield trimmed;
@@ -60,5 +52,18 @@ class ShellRunner {
     }
 
     await proc.exitCode; // drain
+  }
+
+  Map<String, String> _environment(Map<String, String>? overrides) {
+    final windows = Platform.isWindows;
+    return {
+      ...Platform.environment,
+      if (!windows) 'HOME': Platform.environment['HOME'] ?? '',
+      if (!windows) 'LANG': 'en_US.UTF-8',
+      if (!windows)
+        'PATH':
+            '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:${Platform.environment['PATH'] ?? ''}',
+      ...?overrides,
+    };
   }
 }

@@ -203,7 +203,20 @@ class AndroidEmulatorClient {
       }
       addRoot('$home/Library/Android/sdk');
     }
+    final userProfile = env['USERPROFILE'];
+    final localAppData = env['LOCALAPPDATA'];
+    if (Platform.isWindows) {
+      addRoot(env['ANDROID_SDK_ROOT']);
+      addRoot(env['ANDROID_HOME']);
+      if (localAppData != null) {
+        addRoot(p.join(localAppData, 'Android', 'Sdk'));
+      }
+      if (userProfile != null) {
+        addRoot(p.join(userProfile, 'AppData', 'Local', 'Android', 'Sdk'));
+      }
+    }
 
+    if (Platform.isWindows) return roots;
     final volumes = Directory('/Volumes');
     if (volumes.existsSync()) {
       try {
@@ -233,6 +246,21 @@ class AndroidEmulatorClient {
     if (home != null && Directory('$home/.android/avd').existsSync()) {
       return '$home/.android/avd';
     }
+    if (Platform.isWindows) {
+      final userProfile = env['USERPROFILE'];
+      final androidUserHome = env['ANDROID_USER_HOME'];
+      final localAppData = env['LOCALAPPDATA'];
+      for (final candidate in [
+        env['ANDROID_AVD_HOME'],
+        if (androidUserHome != null) p.join(androidUserHome, 'avd'),
+        if (userProfile != null) p.join(userProfile, '.android', 'avd'),
+        if (localAppData != null) p.join(localAppData, 'Android', 'avd'),
+      ]) {
+        if (candidate != null && Directory(candidate).existsSync()) {
+          return candidate;
+        }
+      }
+    }
     return null;
   }
 
@@ -242,14 +270,14 @@ class AndroidEmulatorClient {
         ? _firstSdkRootContaining('emulator/emulator')
         : sdkRootForAvd(avdName);
     if (root == null) return null;
-    final candidate = '$root/emulator/emulator';
+    final candidate = _sdkTool(root, 'emulator/emulator');
     return File(candidate).existsSync() ? candidate : null;
   }
 
   String? adbBinary() {
     final root = _firstSdkRootContaining('platform-tools/adb');
     if (root == null) return null;
-    final candidate = '$root/platform-tools/adb';
+    final candidate = _sdkTool(root, 'platform-tools/adb');
     return File(candidate).existsSync() ? candidate : null;
   }
 
@@ -262,7 +290,7 @@ class AndroidEmulatorClient {
     }
 
     for (final root in _sdkRoots) {
-      final emulator = File('$root/emulator/emulator');
+      final emulator = File(_sdkTool(root, 'emulator/emulator'));
       final image = Directory(
         systemImage.startsWith('/') ? systemImage : '$root/$systemImage',
       );
@@ -927,7 +955,7 @@ class AndroidEmulatorClient {
                     'Android SDK. Searched: $searched',
         );
       }
-      emulator = '$sdkRoot/emulator/emulator';
+      emulator = _sdkTool(sdkRoot, 'emulator/emulator');
 
       if ((await _serialToAvd()).containsValue(avdName)) return;
 
@@ -940,19 +968,25 @@ class AndroidEmulatorClient {
         '${logDirectory.path}/emulator-$safeName-'
         '${DateTime.now().millisecondsSinceEpoch}.log',
       );
+      final executable = Platform.isWindows ? emulator : '/bin/sh';
+      final arguments = Platform.isWindows
+          ? ['-avd', avdName, '-no-boot-anim']
+          : [
+              '-c',
+              r'log=$1; shift; exec "$@" >"$log" 2>&1',
+              'mobile-dev-assistant-emulator',
+              temporaryLog.path,
+              emulator,
+              '-avd',
+              avdName,
+              '-no-boot-anim',
+            ];
       final process = await Process.start(
-        '/bin/sh',
-        [
-          '-c',
-          r'log=$1; shift; exec "$@" >"$log" 2>&1',
-          'mobile-dev-assistant-emulator',
-          temporaryLog.path,
-          emulator,
-          '-avd',
-          avdName,
-          '-no-boot-anim',
-        ],
-        mode: ProcessStartMode.detached,
+        executable,
+        arguments,
+        mode: Platform.isWindows
+            ? ProcessStartMode.detachedWithStdio
+            : ProcessStartMode.detached,
         environment: {
           ...Platform.environment,
           'HOME': Platform.environment['HOME'] ?? avdHome ?? '',
@@ -962,6 +996,20 @@ class AndroidEmulatorClient {
           'ANDROID_AVD_HOME': ?avdHome,
         },
       );
+      if (Platform.isWindows) {
+        process.stdout
+            .transform(const SystemEncoding().decoder)
+            .listen(
+              (chunk) =>
+                  temporaryLog!.writeAsStringSync(chunk, mode: FileMode.append),
+            );
+        process.stderr
+            .transform(const SystemEncoding().decoder)
+            .listen(
+              (chunk) =>
+                  temporaryLog!.writeAsStringSync(chunk, mode: FileMode.append),
+            );
+      }
 
       final deadline = DateTime.now().add(const Duration(seconds: 90));
       while (DateTime.now().isBefore(deadline)) {
@@ -1009,7 +1057,9 @@ class AndroidEmulatorClient {
   }
 
   Future<void> revealDiagnosticLog(String path) async {
-    final result = await _runner.run('/usr/bin/open', ['-R', path]);
+    final result = Platform.isWindows
+        ? await _runner.run('explorer.exe', ['/select,${p.normalize(path)}'])
+        : await _runner.run('/usr/bin/open', ['-R', path]);
     _throwIfFailed(result, fallback: 'Failed to reveal diagnostic log');
   }
 
@@ -1066,7 +1116,14 @@ class AndroidEmulatorClient {
   Future<void> pasteClipboard(String serial) async {
     final endpoint = _emulatorGrpcEndpoint(serial);
     if (endpoint != null) {
-      final clipboard = await _runner.run('/usr/bin/pbpaste', const []);
+      final clipboard = Platform.isWindows
+          ? await _runner.run('powershell.exe', [
+              '-NoProfile',
+              '-NonInteractive',
+              '-Command',
+              'Get-Clipboard -Raw',
+            ])
+          : await _runner.run('/usr/bin/pbpaste', const []);
       _throwIfFailed(
         clipboard,
         fallback: 'Failed to read the computer clipboard',
@@ -1177,6 +1234,19 @@ class AndroidEmulatorClient {
   }
 
   Future<void> _writeHostClipboard(String text) async {
+    if (Platform.isWindows) {
+      final result = await _runner.run('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        'Set-Clipboard -Value ${_powershellLiteral(text)}',
+      ]);
+      _throwIfFailed(
+        result,
+        fallback: 'Failed to write the computer clipboard',
+      );
+      return;
+    }
     final process = await Process.start('/usr/bin/pbcopy', const []);
     final stderr = process.stderr.transform(utf8.decoder).join();
     final stdout = process.stdout.drain<void>();
@@ -1234,6 +1304,18 @@ class AndroidEmulatorClient {
   }
 
   Future<void> _openTerminal(String command, String title) async {
+    if (Platform.isWindows) {
+      final result = await _runner.run('cmd.exe', [
+        '/c',
+        'start',
+        title,
+        'cmd.exe',
+        '/k',
+        command,
+      ]);
+      _throwIfFailed(result, fallback: 'Failed to open Windows Terminal');
+      return;
+    }
     final titledCommand =
         "printf '\\033]0;%s\\007' ${shellQuote(title)}; clear; exec $command";
     final script =
@@ -1278,7 +1360,8 @@ class AndroidEmulatorClient {
   }
 
   Future<String> captureScreenshot(String serial, String deviceName) async {
-    final home = Platform.environment['HOME'];
+    final home =
+        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
     if (home == null || home.isEmpty) {
       throw StateError('Home directory not found');
     }
@@ -1288,7 +1371,9 @@ class AndroidEmulatorClient {
         .replaceAll(':', '-')
         .replaceAll('.', '-');
     final safeName = deviceName.replaceAll(RegExp(r'[^A-Za-z0-9._-]+'), '_');
-    final outputDirectory = Directory('$home/Desktop/Android Screenshots');
+    final outputDirectory = Directory(
+      p.join(home, 'Desktop', 'Android Screenshots'),
+    );
     await outputDirectory.create(recursive: true);
 
     final remotePath = '/sdcard/Download/cleanourmac-$timestamp.png';
@@ -1311,7 +1396,12 @@ class AndroidEmulatorClient {
       await _runAdb(['-s', serial, 'shell', 'rm', '-f', remotePath]);
     }
 
-    await _runner.run('/usr/bin/open', ['-R', localPath]);
+    await _runner.run(
+      Platform.isWindows ? 'explorer.exe' : '/usr/bin/open',
+      Platform.isWindows
+          ? ['/select,${p.normalize(localPath)}']
+          : ['-R', localPath],
+    );
     return localPath;
   }
 
@@ -1363,7 +1453,7 @@ class AndroidEmulatorClient {
 
   String? _firstSdkRootContaining(String relativePath) {
     for (final root in _sdkRoots) {
-      if (File('$root/$relativePath').existsSync()) return root;
+      if (File(_sdkTool(root, relativePath)).existsSync()) return root;
     }
     return null;
   }
@@ -1430,6 +1520,14 @@ class AndroidEmulatorClient {
   }
 
   Future<bool> _isProcessRunning(int pid) async {
+    if (Platform.isWindows) {
+      final result = await Process.run('tasklist', [
+        '/FI',
+        'PID eq $pid',
+        '/NH',
+      ]);
+      return result.exitCode == 0 && result.stdout.toString().contains('$pid');
+    }
     final result = await Process.run('/bin/kill', ['-0', '$pid']);
     return result.exitCode == 0;
   }
@@ -1541,6 +1639,15 @@ class AndroidEmulatorClient {
 
   String _safeFileName(String value) =>
       value.replaceAll(RegExp(r'[^A-Za-z0-9._-]+'), '_');
+
+  String _powershellLiteral(String value) => "'${value.replaceAll("'", "''")}'";
+
+  String _sdkTool(String root, String relative) {
+    final candidate = p.join(root, relative.replaceAll('/', p.separator));
+    if (File(candidate).existsSync()) return candidate;
+    final windowsCandidate = '$candidate.exe';
+    return File(windowsCandidate).existsSync() ? windowsCandidate : candidate;
+  }
 
   void _deleteTemporaryLog(File? logFile) {
     if (logFile == null) return;

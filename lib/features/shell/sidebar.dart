@@ -24,13 +24,13 @@ class Sidebar extends StatelessWidget {
 
   static const _items = [
     _SidebarItem.icon(Icons.space_dashboard_rounded),
+    _SidebarItem.icon(Icons.key_rounded),
     _SidebarItem.icon(Icons.devices_rounded),
     _SidebarItem.reactNative(),
     _SidebarItem.icon(Icons.auto_delete_rounded),
     _SidebarItem.icon(Icons.folder_special_outlined),
     _SidebarItem.icon(Icons.smart_toy_outlined),
     _SidebarItem.icon(Icons.folder_copy_rounded),
-    _SidebarItem.icon(Icons.data_object_rounded),
     _SidebarItem.icon(Icons.settings_rounded),
   ];
 
@@ -41,13 +41,13 @@ class Sidebar extends StatelessWidget {
     final l10n = context.l10n;
     final labels = [
       l10n.overview,
+      l10n.jwtTools,
       l10n.simulators,
       l10n.reactNative,
       l10n.scanAndClean,
       l10n.projectCaches,
       l10n.aiAgentCaches,
       l10n.largeFiles,
-      l10n.nodeModules,
       l10n.settings,
     ];
     return SizedBox(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n/localization_extensions.dart';
+import '../../core/platform/platform_capabilities.dart';
 import '../../core/widgets/app_page_title.dart';
 import '../../domain/models/android_emulator.dart';
 import '../../domain/models/simulator_device.dart';
@@ -44,7 +45,13 @@ class _SimulatorPageState extends ConsumerState<SimulatorPage> {
     final ios = iosAsync.valueOrNull ?? const <SimulatorDevice>[];
     final android = androidAsync.valueOrNull ?? const <AndroidEmulator>[];
     final hasIos = ios.isNotEmpty;
-    final hasAndroid = android.isNotEmpty || androidSdk;
+    // Keep Android visible on macOS even before the SDK is installed so the
+    // user can bootstrap the environment from the empty state.
+    final hasAndroid =
+        android.isNotEmpty ||
+        androidSdk ||
+        PlatformCapabilities.isMacOS ||
+        PlatformCapabilities.isWindows;
 
     if (!hasIos && !hasAndroid) {
       return Scaffold(
@@ -60,7 +67,7 @@ class _SimulatorPageState extends ConsumerState<SimulatorPage> {
       );
     }
 
-    if (hasAndroid && hasIos) {
+    if (hasAndroid && hasIos && PlatformCapabilities.supportsIosTooling) {
       return DefaultTabController(
         length: 2,
         initialIndex: _selectedTab,

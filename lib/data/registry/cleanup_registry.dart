@@ -3,35 +3,41 @@ import '../../domain/models/cleanup_target.dart';
 
 class CleanupRegistry {
   static List<CleanupTarget> build() {
-    final home = Platform.environment['HOME']!;
-    return [
+    final home =
+        Platform.environment['HOME'] ??
+        Platform.environment['USERPROFILE'] ??
+        '.';
+    final targets = <CleanupTarget>[
       // High-impact items physically stored on the primary Data volume.
-      const CleanupTarget(
-        id: 'ios_runtime_caches',
-        label: 'iOS Runtime Caches',
-        description:
-            'Generated dyld caches. Xcode rebuilds them when the runtime is used again.',
-        absolutePath: '/Library/Developer/CoreSimulator/Caches/dyld',
-        safety: SafetyLevel.caution,
-        strategy: ScanStrategy.simctlDyldCache,
-      ),
-      const CleanupTarget(
-        id: 'ios_runtimes',
-        label: 'iOS Runtime Images',
-        description:
-            'Downloaded iOS versions. Remove old runtimes you no longer test against.',
-        absolutePath: '/Library/Developer/CoreSimulator',
-        safety: SafetyLevel.caution,
-        strategy: ScanStrategy.simctlRuntime,
-      ),
-      CleanupTarget(
-        id: 'ios_simulators',
-        label: 'iOS Simulator Devices',
-        description: 'Simulator app data. Uses xcrun simctl for safe removal.',
-        absolutePath: '$home/Library/Developer/CoreSimulator/Devices',
-        safety: SafetyLevel.caution,
-        strategy: ScanStrategy.simctl,
-      ),
+      if (Platform.isMacOS) ...[
+        const CleanupTarget(
+          id: 'ios_runtime_caches',
+          label: 'iOS Runtime Caches',
+          description:
+              'Generated dyld caches. Xcode rebuilds them when the runtime is used again.',
+          absolutePath: '/Library/Developer/CoreSimulator/Caches/dyld',
+          safety: SafetyLevel.caution,
+          strategy: ScanStrategy.simctlDyldCache,
+        ),
+        const CleanupTarget(
+          id: 'ios_runtimes',
+          label: 'iOS Runtime Images',
+          description:
+              'Downloaded iOS versions. Remove old runtimes you no longer test against.',
+          absolutePath: '/Library/Developer/CoreSimulator',
+          safety: SafetyLevel.caution,
+          strategy: ScanStrategy.simctlRuntime,
+        ),
+        CleanupTarget(
+          id: 'ios_simulators',
+          label: 'iOS Simulator Devices',
+          description:
+              'Simulator app data. Uses xcrun simctl for safe removal.',
+          absolutePath: '$home/Library/Developer/CoreSimulator/Devices',
+          safety: SafetyLevel.caution,
+          strategy: ScanStrategy.simctl,
+        ),
+      ],
       CleanupTarget(
         id: 'app_caches',
         label: 'Application Caches',
@@ -386,5 +392,16 @@ class CleanupRegistry {
         contentsOnly: true,
       ),
     ];
+    if (Platform.isWindows) {
+      return targets
+          .where(
+            (target) =>
+                target.strategy != ScanStrategy.simctl &&
+                target.strategy != ScanStrategy.simctlRuntime &&
+                target.strategy != ScanStrategy.simctlDyldCache,
+          )
+          .toList();
+    }
+    return targets;
   }
 }

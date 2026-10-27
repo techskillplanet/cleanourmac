@@ -6,14 +6,23 @@ import '../../core/l10n/localization_extensions.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_page_title.dart';
 import '../../domain/models/project_cache.dart';
+import '../../features/node_modules/node_modules_page.dart';
 import '../../providers/infra_providers.dart';
+import '../../providers/node_modules_providers.dart';
 import '../../providers/project_cache_providers.dart';
 
-class ProjectCachePage extends ConsumerWidget {
+class ProjectCachePage extends ConsumerStatefulWidget {
   const ProjectCachePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProjectCachePage> createState() => _ProjectCachePageState();
+}
+
+class _ProjectCachePageState extends ConsumerState<ProjectCachePage> {
+  int _tabIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(projectCacheProvider);
     final notifier = ref.read(projectCacheProvider.notifier);
 
@@ -23,72 +32,91 @@ class ProjectCachePage extends ConsumerWidget {
           title: context.l10n.projectCaches,
           subtitle: context.l10n.projectCachesSubtitle,
         ),
+        bottom: TabBar(
+          onTap: (index) => setState(() => _tabIndex = index),
+          tabs: [
+            Tab(text: context.l10n.projectCaches),
+            Tab(text: context.l10n.nodeModules),
+          ],
+        ),
         actions: [
-          TextButton.icon(
-            onPressed: () => _addRoot(context, ref),
-            icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-            label: Text(context.l10n.addRnProject),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: TextButton.icon(
-              onPressed: state.scanning ? null : notifier.scan,
-              icon: state.scanning
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh_rounded, size: 18),
-              label: Text(context.l10n.detectCaches),
+          if (_tabIndex == 0) ...[
+            TextButton.icon(
+              onPressed: () => _addRoot(context),
+              icon: const Icon(Icons.create_new_folder_outlined, size: 18),
+              label: Text(context.l10n.addRnProject),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: TextButton.icon(
+                onPressed: state.scanning ? null : notifier.scan,
+                icon: state.scanning
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(context.l10n.detectCaches),
+              ),
+            ),
+          ] else
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: TextButton.icon(
+                onPressed: () => ref.invalidate(nodeModulesProvider),
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(context.l10n.scan),
+              ),
+            ),
         ],
       ),
-      body: Column(
-        children: [
-          if (state.scanning) const LinearProgressIndicator(),
-          if (state.lastResult != null)
-            _ResultBanner(result: state.lastResult!),
-          Expanded(
-            child: state.scanning && state.items.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : state.error != null
-                ? _ErrorState(error: state.error!, onRetry: notifier.scan)
-                : state.items.isEmpty
-                ? _EmptyState(onRetry: notifier.scan)
-                : ListView(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 110),
-                    children: [
-                      const _SafetyNotice(),
-                      const SizedBox(height: 14),
-                      _Summary(state: state, notifier: notifier),
-                      const SizedBox(height: 14),
-                      ..._groupByProject(state.items).entries.map(
-                        (entry) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _ProjectGroup(
-                            items: entry.value,
-                            onToggle: notifier.toggle,
-                            onToggleAll: (selected) =>
-                                notifier.toggleProject(entry.key, selected),
-                          ),
+      body: _tabIndex == 1
+          ? const NodeModulesPanel()
+          : Column(
+              children: [
+                if (state.scanning) const LinearProgressIndicator(),
+                if (state.lastResult != null)
+                  _ResultBanner(result: state.lastResult!),
+                Expanded(
+                  child: state.scanning && state.items.isEmpty
+                      ? const Center(child: CircularProgressIndicator())
+                      : state.error != null
+                      ? _ErrorState(error: state.error!, onRetry: notifier.scan)
+                      : state.items.isEmpty
+                      ? _EmptyState(onRetry: notifier.scan)
+                      : ListView(
+                          padding: const EdgeInsets.fromLTRB(24, 20, 24, 110),
+                          children: [
+                            const _SafetyNotice(),
+                            const SizedBox(height: 14),
+                            _Summary(state: state, notifier: notifier),
+                            const SizedBox(height: 14),
+                            ..._groupByProject(state.items).entries.map(
+                              (entry) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _ProjectGroup(
+                                  items: entry.value,
+                                  onToggle: notifier.toggle,
+                                  onToggleAll: (selected) => notifier
+                                      .toggleProject(entry.key, selected),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                ),
+                if (state.selectedCount > 0)
+                  _CleanBar(
+                    state: state,
+                    onClean: () => _confirmClean(context, notifier, state),
                   ),
-          ),
-          if (state.selectedCount > 0)
-            _CleanBar(
-              state: state,
-              onClean: () => _confirmClean(context, notifier, state),
+              ],
             ),
-        ],
-      ),
     );
   }
 
-  Future<void> _addRoot(BuildContext context, WidgetRef ref) async {
+  Future<void> _addRoot(BuildContext context) async {
     final l10n = context.l10n;
     try {
       final path = await ref
