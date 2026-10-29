@@ -496,6 +496,7 @@
   "jwtExpires": "Expires",
   "jwtNotExpired": "Token is not expired",
   "jwtExpired": "Token is expired",
+  "jwtNotYetValid": "Token is not valid yet",
   "jwtVerifyFailed": "Verification failed",
   "copy": "Copy"
 }

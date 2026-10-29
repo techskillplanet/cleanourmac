@@ -496,6 +496,7 @@
   "jwtExpires": "有效期至",
   "jwtNotExpired": "Token 未过期",
   "jwtExpired": "Token 已过期",
+  "jwtNotYetValid": "Token 尚未生效",
   "jwtVerifyFailed": "校验失败",
   "copy": "复制"
 }

@@ -62,6 +62,43 @@ void main() {
     );
   });
 
+  test('checks nbf and iat with a small clock-skew tolerance', () async {
+    final service = JwtService();
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final token = await service.sign(
+      algorithm: 'HS256',
+      header: header,
+      payload: {'iat': now + 61, 'nbf': now + 61, 'exp': now + 3600},
+      key: secret,
+    );
+    final result = await service.verify(token: token, key: secret);
+
+    expect(result.signatureValid, isTrue);
+    expect(result.issuedAtValid, isFalse);
+    expect(result.notBeforeValid, isFalse);
+    expect(result.tokenValid, isFalse);
+  });
+
+  test('rejects a token when its algorithm is not accepted', () async {
+    final service = JwtService();
+    final token = await service.sign(
+      algorithm: 'HS256',
+      header: header,
+      payload: payload,
+      key: secret,
+    );
+
+    final result = await service.verify(
+      token: token,
+      key: secret,
+      acceptedAlgorithms: const ['RS256'],
+    );
+
+    expect(result.signatureValid, isFalse);
+    expect(result.tokenValid, isFalse);
+    expect(result.error, contains('not accepted'));
+  });
+
   test('normalizes PEM body whitespace without changing its label', () {
     final service = JwtService();
 

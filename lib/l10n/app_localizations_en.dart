@@ -1776,6 +1776,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jwtExpired => 'Token is expired';
 
   @override
+  String get jwtNotYetValid => 'Token is not valid yet';
+
+  @override
   String get jwtVerifyFailed => 'Verification failed';
 
   @override

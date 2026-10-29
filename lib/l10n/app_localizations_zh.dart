@@ -1709,6 +1709,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get jwtExpired => 'Token 已过期';
 
   @override
+  String get jwtNotYetValid => 'Token 尚未生效';
+
+  @override
   String get jwtVerifyFailed => '校验失败';
 
   @override

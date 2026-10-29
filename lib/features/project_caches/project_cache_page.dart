@@ -18,8 +18,30 @@ class ProjectCachePage extends ConsumerStatefulWidget {
   ConsumerState<ProjectCachePage> createState() => _ProjectCachePageState();
 }
 
-class _ProjectCachePageState extends ConsumerState<ProjectCachePage> {
+class _ProjectCachePageState extends ConsumerState<ProjectCachePage>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
   int _tabIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(_handleTabChanged);
+  }
+
+  @override
+  void dispose() {
+    _tabController
+      ..removeListener(_handleTabChanged)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _handleTabChanged() {
+    if (!mounted || _tabIndex == _tabController.index) return;
+    setState(() => _tabIndex = _tabController.index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +55,7 @@ class _ProjectCachePageState extends ConsumerState<ProjectCachePage> {
           subtitle: context.l10n.projectCachesSubtitle,
         ),
         bottom: TabBar(
-          onTap: (index) => setState(() => _tabIndex = index),
+          controller: _tabController,
           tabs: [
             Tab(text: context.l10n.projectCaches),
             Tab(text: context.l10n.nodeModules),

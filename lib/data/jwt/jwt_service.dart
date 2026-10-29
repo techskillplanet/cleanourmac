@@ -10,6 +10,9 @@ import '../shell/shell_runner.dart';
 class JwtVerification {
   final bool signatureValid;
   final bool? tokenValid;
+  final bool? expirationValid;
+  final bool? notBeforeValid;
+  final bool? issuedAtValid;
   final Map<String, dynamic> header;
   final dynamic payload;
   final String? error;
@@ -17,6 +20,9 @@ class JwtVerification {
   const JwtVerification({
     required this.signatureValid,
     required this.tokenValid,
+    this.expirationValid,
+    this.notBeforeValid,
+    this.issuedAtValid,
     required this.header,
     required this.payload,
     this.error,
@@ -78,17 +84,32 @@ class JwtService {
         key,
         signature,
       );
-      final expiration = payload is Map<String, dynamic>
-          ? _asInt(payload['exp'])
-          : null;
-      final tokenValid = expiration == null
-          ? signatureValid
-          : signatureValid &&
-                expiration >= DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final claims = payload is Map<String, dynamic>
+          ? payload
+          : const <String, dynamic>{};
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final expiration = _asInt(claims['exp']);
+      final notBefore = _asInt(claims['nbf']);
+      final issuedAt = _asInt(claims['iat']);
+      final expirationValid = expiration == null ? null : expiration >= now;
+      final notBeforeValid = notBefore == null
+          ? null
+          : now + _clockSkewSeconds >= notBefore;
+      final issuedAtValid = issuedAt == null
+          ? null
+          : issuedAt <= now + _clockSkewSeconds;
+      final tokenValid =
+          signatureValid &&
+          expirationValid != false &&
+          notBeforeValid != false &&
+          issuedAtValid != false;
 
       return JwtVerification(
         signatureValid: signatureValid,
         tokenValid: tokenValid,
+        expirationValid: expirationValid,
+        notBeforeValid: notBeforeValid,
+        issuedAtValid: issuedAtValid,
         header: header,
         payload: payload,
       );
@@ -96,6 +117,9 @@ class JwtService {
       return JwtVerification(
         signatureValid: false,
         tokenValid: false,
+        expirationValid: false,
+        notBeforeValid: false,
+        issuedAtValid: false,
         header: const {},
         payload: null,
         error: error.toString(),
@@ -277,4 +301,6 @@ class JwtService {
     if (value is num) return value.toInt();
     return int.tryParse('$value');
   }
+
+  static const _clockSkewSeconds = 60;
 }

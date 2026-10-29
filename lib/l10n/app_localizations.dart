@@ -3079,6 +3079,12 @@ abstract class AppLocalizations {
   /// **'Token 已过期'**
   String get jwtExpired;
 
+  /// No description provided for @jwtNotYetValid.
+  ///
+  /// In zh, this message translates to:
+  /// **'Token 尚未生效'**
+  String get jwtNotYetValid;
+
   /// No description provided for @jwtVerifyFailed.
   ///
   /// In zh, this message translates to:

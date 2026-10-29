@@ -37,6 +37,7 @@ class _JwtPageState extends State<JwtPage> {
     _privateKeyController = TextEditingController(text: JwtDefaults.privateKey);
     _publicKeyController = TextEditingController(text: JwtDefaults.publicKey);
     _jwtController = TextEditingController();
+    _jwtController.addListener(_handleTokenChanged);
   }
 
   @override
@@ -45,8 +46,13 @@ class _JwtPageState extends State<JwtPage> {
     _payloadController.dispose();
     _privateKeyController.dispose();
     _publicKeyController.dispose();
+    _jwtController.removeListener(_handleTokenChanged);
     _jwtController.dispose();
     super.dispose();
+  }
+
+  void _handleTokenChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -376,13 +382,18 @@ class _JwtPageState extends State<JwtPage> {
       final header =
           jsonDecode(utf8.decode(_decodeBase64(parts[0])))
               as Map<String, dynamic>;
-      final algorithm = (header['alg'] as String? ?? '').toUpperCase();
-      final key = algorithm.startsWith('HS')
+      final tokenAlgorithm = (header['alg'] as String? ?? '').toUpperCase();
+      if (tokenAlgorithm != _algorithm) {
+        throw StateError(
+          '${l10n.jwtAlgorithm}: $tokenAlgorithm != $_algorithm',
+        );
+      }
+      final key = _algorithm.startsWith('HS')
           ? _privateKeyController.text.trim()
           : _publicKeyController.text.trim();
       if (key.isEmpty) {
         throw StateError(
-          algorithm.startsWith('HS')
+          _algorithm.startsWith('HS')
               ? l10n.jwtPrivateKeyRequired
               : l10n.jwtPublicKeyRequired,
         );
@@ -390,7 +401,7 @@ class _JwtPageState extends State<JwtPage> {
       final result = await _service.verify(
         token: token,
         key: key,
-        acceptedAlgorithms: [algorithm],
+        acceptedAlgorithms: [_algorithm],
       );
       if (!mounted) return;
       final payload = result.payload is Map<String, dynamic>
@@ -400,10 +411,9 @@ class _JwtPageState extends State<JwtPage> {
       final text = [
         '${l10n.jwtSignature}: ${result.signatureValid ? l10n.jwtPassed : l10n.jwtFailed}',
         if (exp != null) '${l10n.jwtExpires}: ${_formatTimestamp(exp)}',
-        if (exp != null)
-          exp >= DateTime.now().millisecondsSinceEpoch ~/ 1000
-              ? l10n.jwtNotExpired
-              : l10n.jwtExpired,
+        if (result.expirationValid == false) l10n.jwtExpired,
+        if (result.notBeforeValid == false) l10n.jwtNotYetValid,
+        if (result.issuedAtValid == false) l10n.jwtFutureIat,
       ].join('\n');
       setState(
         () => _verifyMessage = _JwtMessage(
