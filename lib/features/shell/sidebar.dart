@@ -25,6 +25,7 @@ class Sidebar extends StatelessWidget {
   static const _items = [
     _SidebarItem.icon(Icons.space_dashboard_rounded),
     _SidebarItem.icon(Icons.key_rounded),
+    _SidebarItem.icon(Icons.notifications_active_outlined),
     _SidebarItem.icon(Icons.devices_rounded),
     _SidebarItem.reactNative(),
     _SidebarItem.icon(Icons.auto_delete_rounded),
@@ -42,6 +43,7 @@ class Sidebar extends StatelessWidget {
     final labels = [
       l10n.overview,
       l10n.jwtTools,
+      l10n.fcmPush,
       l10n.simulators,
       l10n.reactNative,
       l10n.scanAndClean,

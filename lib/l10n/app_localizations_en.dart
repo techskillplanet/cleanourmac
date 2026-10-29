@@ -1783,4 +1783,104 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copy => 'Copy';
+
+  @override
+  String get fcmPush => 'FCM Push';
+
+  @override
+  String get fcmPushSubtitle =>
+      'Debug Firebase Cloud Messaging HTTP v1 locally';
+
+  @override
+  String get fcmMemoryOnly => 'Memory only · not saved';
+
+  @override
+  String get fcmConfigSection => 'Service account';
+
+  @override
+  String get fcmConfigHint =>
+      'Paste a Firebase service-account JSON or import a local file. Credentials stay in memory for this session only.';
+
+  @override
+  String get fcmPasteJson => 'Paste service-account JSON';
+
+  @override
+  String get fcmImportJson => 'Import JSON';
+
+  @override
+  String get fcmPickFile => 'Choose file';
+
+  @override
+  String get fcmClearAccounts => 'Clear accounts';
+
+  @override
+  String get fcmNoAccount => 'No service account imported';
+
+  @override
+  String get fcmSelectedProject => 'Current project';
+
+  @override
+  String get fcmGenerateToken => 'Generate access token';
+
+  @override
+  String get fcmTokenPreview => 'Token preview';
+
+  @override
+  String get fcmMessageSection => 'Message';
+
+  @override
+  String get fcmModeSimple => 'Simple form';
+
+  @override
+  String get fcmModeJson => 'Full JSON';
+
+  @override
+  String get fcmDeviceToken => 'Device token';
+
+  @override
+  String get fcmBatchTokens => 'Batch tokens (newline or comma separated)';
+
+  @override
+  String get fcmTitle => 'Title';
+
+  @override
+  String get fcmBody => 'Body';
+
+  @override
+  String get fcmImageUrl => 'Image URL (optional)';
+
+  @override
+  String get fcmDataJson => 'Data JSON (optional)';
+
+  @override
+  String get fcmFullJson => 'Full FCM request JSON';
+
+  @override
+  String get fcmLoadDemo => 'Load demo payload';
+
+  @override
+  String get fcmSend => 'Send';
+
+  @override
+  String get fcmSendBatch => 'Send batch';
+
+  @override
+  String get fcmBatchConfirmTitle => 'Confirm batch send';
+
+  @override
+  String fcmBatchConfirmBody(int count) {
+    return 'Send the same message to $count device tokens one by one?';
+  }
+
+  @override
+  String get fcmResultSection => 'Result';
+
+  @override
+  String get fcmHistorySection => 'Session send history';
+
+  @override
+  String get fcmHistoryEmpty => 'No sends in this session yet';
+
+  @override
+  String get fcmBusy => 'Working…';
 }

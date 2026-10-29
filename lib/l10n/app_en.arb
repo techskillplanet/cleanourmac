@@ -498,5 +498,44 @@
   "jwtExpired": "Token is expired",
   "jwtNotYetValid": "Token is not valid yet",
   "jwtVerifyFailed": "Verification failed",
-  "copy": "Copy"
+  "copy": "Copy",
+  "fcmPush": "FCM Push",
+  "fcmPushSubtitle": "Debug Firebase Cloud Messaging HTTP v1 locally",
+  "fcmMemoryOnly": "Memory only · not saved",
+  "fcmConfigSection": "Service account",
+  "fcmConfigHint": "Paste a Firebase service-account JSON or import a local file. Credentials stay in memory for this session only.",
+  "fcmPasteJson": "Paste service-account JSON",
+  "fcmImportJson": "Import JSON",
+  "fcmPickFile": "Choose file",
+  "fcmClearAccounts": "Clear accounts",
+  "fcmNoAccount": "No service account imported",
+  "fcmSelectedProject": "Current project",
+  "fcmGenerateToken": "Generate access token",
+  "fcmTokenPreview": "Token preview",
+  "fcmMessageSection": "Message",
+  "fcmModeSimple": "Simple form",
+  "fcmModeJson": "Full JSON",
+  "fcmDeviceToken": "Device token",
+  "fcmBatchTokens": "Batch tokens (newline or comma separated)",
+  "fcmTitle": "Title",
+  "fcmBody": "Body",
+  "fcmImageUrl": "Image URL (optional)",
+  "fcmDataJson": "Data JSON (optional)",
+  "fcmFullJson": "Full FCM request JSON",
+  "fcmLoadDemo": "Load demo payload",
+  "fcmSend": "Send",
+  "fcmSendBatch": "Send batch",
+  "fcmBatchConfirmTitle": "Confirm batch send",
+  "fcmBatchConfirmBody": "Send the same message to {count} device tokens one by one?",
+  "@fcmBatchConfirmBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fcmResultSection": "Result",
+  "fcmHistorySection": "Session send history",
+  "fcmHistoryEmpty": "No sends in this session yet",
+  "fcmBusy": "Working…"
 }

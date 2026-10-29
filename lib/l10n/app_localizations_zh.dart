@@ -1716,4 +1716,102 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get copy => '复制';
+
+  @override
+  String get fcmPush => 'FCM 推送';
+
+  @override
+  String get fcmPushSubtitle => '本地调试 Firebase Cloud Messaging HTTP v1';
+
+  @override
+  String get fcmMemoryOnly => '仅内存 · 不落盘';
+
+  @override
+  String get fcmConfigSection => '服务账号配置';
+
+  @override
+  String get fcmConfigHint => '粘贴 Firebase 服务账号 JSON，或从本地文件导入。配置只保存在当前会话内存中。';
+
+  @override
+  String get fcmPasteJson => '粘贴服务账号 JSON';
+
+  @override
+  String get fcmImportJson => '导入 JSON';
+
+  @override
+  String get fcmPickFile => '选择文件';
+
+  @override
+  String get fcmClearAccounts => '清空配置';
+
+  @override
+  String get fcmNoAccount => '尚未导入服务账号';
+
+  @override
+  String get fcmSelectedProject => '当前项目';
+
+  @override
+  String get fcmGenerateToken => '生成 Access Token';
+
+  @override
+  String get fcmTokenPreview => 'Token 预览';
+
+  @override
+  String get fcmMessageSection => '消息';
+
+  @override
+  String get fcmModeSimple => '简化表单';
+
+  @override
+  String get fcmModeJson => '完整 JSON';
+
+  @override
+  String get fcmDeviceToken => '设备 Token';
+
+  @override
+  String get fcmBatchTokens => '批量 Token（换行或逗号分隔）';
+
+  @override
+  String get fcmTitle => '标题';
+
+  @override
+  String get fcmBody => '正文';
+
+  @override
+  String get fcmImageUrl => '图片 URL（可选）';
+
+  @override
+  String get fcmDataJson => 'Data JSON（可选）';
+
+  @override
+  String get fcmFullJson => '完整 FCM 请求 JSON';
+
+  @override
+  String get fcmLoadDemo => '填入演示数据';
+
+  @override
+  String get fcmSend => '发送';
+
+  @override
+  String get fcmSendBatch => '批量发送';
+
+  @override
+  String get fcmBatchConfirmTitle => '确认批量发送';
+
+  @override
+  String fcmBatchConfirmBody(int count) {
+    return '将向 $count 个设备 token 逐条发送同一条消息，是否继续？';
+  }
+
+  @override
+  String get fcmResultSection => '结果';
+
+  @override
+  String get fcmHistorySection => '会话发送记录';
+
+  @override
+  String get fcmHistoryEmpty => '本会话还没有发送记录';
+
+  @override
+  String get fcmBusy => '处理中…';
 }

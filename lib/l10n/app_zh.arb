@@ -498,5 +498,44 @@
   "jwtExpired": "Token 已过期",
   "jwtNotYetValid": "Token 尚未生效",
   "jwtVerifyFailed": "校验失败",
-  "copy": "复制"
+  "copy": "复制",
+  "fcmPush": "FCM 推送",
+  "fcmPushSubtitle": "本地调试 Firebase Cloud Messaging HTTP v1",
+  "fcmMemoryOnly": "仅内存 · 不落盘",
+  "fcmConfigSection": "服务账号配置",
+  "fcmConfigHint": "粘贴 Firebase 服务账号 JSON，或从本地文件导入。配置只保存在当前会话内存中。",
+  "fcmPasteJson": "粘贴服务账号 JSON",
+  "fcmImportJson": "导入 JSON",
+  "fcmPickFile": "选择文件",
+  "fcmClearAccounts": "清空配置",
+  "fcmNoAccount": "尚未导入服务账号",
+  "fcmSelectedProject": "当前项目",
+  "fcmGenerateToken": "生成 Access Token",
+  "fcmTokenPreview": "Token 预览",
+  "fcmMessageSection": "消息",
+  "fcmModeSimple": "简化表单",
+  "fcmModeJson": "完整 JSON",
+  "fcmDeviceToken": "设备 Token",
+  "fcmBatchTokens": "批量 Token（换行或逗号分隔）",
+  "fcmTitle": "标题",
+  "fcmBody": "正文",
+  "fcmImageUrl": "图片 URL（可选）",
+  "fcmDataJson": "Data JSON（可选）",
+  "fcmFullJson": "完整 FCM 请求 JSON",
+  "fcmLoadDemo": "填入演示数据",
+  "fcmSend": "发送",
+  "fcmSendBatch": "批量发送",
+  "fcmBatchConfirmTitle": "确认批量发送",
+  "fcmBatchConfirmBody": "将向 {count} 个设备 token 逐条发送同一条消息，是否继续？",
+  "@fcmBatchConfirmBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fcmResultSection": "结果",
+  "fcmHistorySection": "会话发送记录",
+  "fcmHistoryEmpty": "本会话还没有发送记录",
+  "fcmBusy": "处理中…"
 }

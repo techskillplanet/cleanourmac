@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../ai_agents/ai_agent_cache_page.dart';
+import '../fcm/fcm_push_page.dart';
 import '../react_native/react_native_page.dart';
 import 'sidebar.dart';
 import '../dashboard/dashboard_page.dart';
@@ -19,22 +20,23 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
-  final List<Widget?> _pageCache = List<Widget?>.filled(9, null);
+  final List<Widget?> _pageCache = List<Widget?>.filled(10, null);
 
   Widget _createPage(int index) {
     return switch (index) {
       0 => DashboardPage(
-        onOpenDevices: () => _selectPage(2),
-        onStartScan: () => _selectPage(4),
+        onOpenDevices: () => _selectPage(3),
+        onStartScan: () => _selectPage(5),
       ),
       1 => const JwtPage(),
-      2 => const SimulatorPage(),
-      3 => const ReactNativePage(),
-      4 => const ScanPage(),
-      5 => const ProjectCachePage(),
-      6 => const AiAgentCachePage(),
-      7 => const LargeFilesPage(),
-      8 => const SettingsPage(),
+      2 => const FcmPushPage(),
+      3 => const SimulatorPage(),
+      4 => const ReactNativePage(),
+      5 => const ScanPage(),
+      6 => const ProjectCachePage(),
+      7 => const AiAgentCachePage(),
+      8 => const LargeFilesPage(),
+      9 => const SettingsPage(),
       _ => const SizedBox.shrink(),
     };
   }

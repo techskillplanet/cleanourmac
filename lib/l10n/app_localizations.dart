@@ -3096,6 +3096,198 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'复制'**
   String get copy;
+
+  /// No description provided for @fcmPush.
+  ///
+  /// In zh, this message translates to:
+  /// **'FCM 推送'**
+  String get fcmPush;
+
+  /// No description provided for @fcmPushSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地调试 Firebase Cloud Messaging HTTP v1'**
+  String get fcmPushSubtitle;
+
+  /// No description provided for @fcmMemoryOnly.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅内存 · 不落盘'**
+  String get fcmMemoryOnly;
+
+  /// No description provided for @fcmConfigSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'服务账号配置'**
+  String get fcmConfigSection;
+
+  /// No description provided for @fcmConfigHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'粘贴 Firebase 服务账号 JSON，或从本地文件导入。配置只保存在当前会话内存中。'**
+  String get fcmConfigHint;
+
+  /// No description provided for @fcmPasteJson.
+  ///
+  /// In zh, this message translates to:
+  /// **'粘贴服务账号 JSON'**
+  String get fcmPasteJson;
+
+  /// No description provided for @fcmImportJson.
+  ///
+  /// In zh, this message translates to:
+  /// **'导入 JSON'**
+  String get fcmImportJson;
+
+  /// No description provided for @fcmPickFile.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择文件'**
+  String get fcmPickFile;
+
+  /// No description provided for @fcmClearAccounts.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空配置'**
+  String get fcmClearAccounts;
+
+  /// No description provided for @fcmNoAccount.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚未导入服务账号'**
+  String get fcmNoAccount;
+
+  /// No description provided for @fcmSelectedProject.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前项目'**
+  String get fcmSelectedProject;
+
+  /// No description provided for @fcmGenerateToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成 Access Token'**
+  String get fcmGenerateToken;
+
+  /// No description provided for @fcmTokenPreview.
+  ///
+  /// In zh, this message translates to:
+  /// **'Token 预览'**
+  String get fcmTokenPreview;
+
+  /// No description provided for @fcmMessageSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'消息'**
+  String get fcmMessageSection;
+
+  /// No description provided for @fcmModeSimple.
+  ///
+  /// In zh, this message translates to:
+  /// **'简化表单'**
+  String get fcmModeSimple;
+
+  /// No description provided for @fcmModeJson.
+  ///
+  /// In zh, this message translates to:
+  /// **'完整 JSON'**
+  String get fcmModeJson;
+
+  /// No description provided for @fcmDeviceToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'设备 Token'**
+  String get fcmDeviceToken;
+
+  /// No description provided for @fcmBatchTokens.
+  ///
+  /// In zh, this message translates to:
+  /// **'批量 Token（换行或逗号分隔）'**
+  String get fcmBatchTokens;
+
+  /// No description provided for @fcmTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'标题'**
+  String get fcmTitle;
+
+  /// No description provided for @fcmBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'正文'**
+  String get fcmBody;
+
+  /// No description provided for @fcmImageUrl.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片 URL（可选）'**
+  String get fcmImageUrl;
+
+  /// No description provided for @fcmDataJson.
+  ///
+  /// In zh, this message translates to:
+  /// **'Data JSON（可选）'**
+  String get fcmDataJson;
+
+  /// No description provided for @fcmFullJson.
+  ///
+  /// In zh, this message translates to:
+  /// **'完整 FCM 请求 JSON'**
+  String get fcmFullJson;
+
+  /// No description provided for @fcmLoadDemo.
+  ///
+  /// In zh, this message translates to:
+  /// **'填入演示数据'**
+  String get fcmLoadDemo;
+
+  /// No description provided for @fcmSend.
+  ///
+  /// In zh, this message translates to:
+  /// **'发送'**
+  String get fcmSend;
+
+  /// No description provided for @fcmSendBatch.
+  ///
+  /// In zh, this message translates to:
+  /// **'批量发送'**
+  String get fcmSendBatch;
+
+  /// No description provided for @fcmBatchConfirmTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认批量发送'**
+  String get fcmBatchConfirmTitle;
+
+  /// No description provided for @fcmBatchConfirmBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'将向 {count} 个设备 token 逐条发送同一条消息，是否继续？'**
+  String fcmBatchConfirmBody(int count);
+
+  /// No description provided for @fcmResultSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'结果'**
+  String get fcmResultSection;
+
+  /// No description provided for @fcmHistorySection.
+  ///
+  /// In zh, this message translates to:
+  /// **'会话发送记录'**
+  String get fcmHistorySection;
+
+  /// No description provided for @fcmHistoryEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'本会话还没有发送记录'**
+  String get fcmHistoryEmpty;
+
+  /// No description provided for @fcmBusy.
+  ///
+  /// In zh, this message translates to:
+  /// **'处理中…'**
+  String get fcmBusy;
 }
 
 class _AppLocalizationsDelegate
