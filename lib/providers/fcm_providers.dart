@@ -296,13 +296,10 @@ class FcmPushNotifier extends StateNotifier<FcmPushState> {
         clientEmail: account.clientEmail,
         privateKey: account.privateKey,
       );
-      final preview = token.length <= 28
-          ? token
-          : '${token.substring(0, 16)}...${token.substring(token.length - 8)}';
       state = state.copyWith(
         busy: false,
-        accessTokenPreview: preview,
-        lastResult: 'Access Token 已生成（仅预览，完整值不落盘）',
+        accessTokenPreview: token,
+        lastResult: 'Access Token 已生成（会话内存，不落盘）',
       );
     } catch (error) {
       state = state.copyWith(busy: false, error: error.toString());

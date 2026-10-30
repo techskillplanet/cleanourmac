@@ -512,7 +512,7 @@
   "fcmNoAccount": "尚未加载服务账号",
   "fcmSelectedProject": "当前项目",
   "fcmGenerateToken": "生成 Access Token",
-  "fcmTokenPreview": "Token 预览",
+  "fcmTokenPreview": "Access Token",
   "fcmMessageSection": "消息",
   "fcmModeSimple": "简化表单",
   "fcmModeJson": "完整 JSON",

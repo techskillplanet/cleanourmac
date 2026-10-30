@@ -269,7 +269,29 @@ class _FcmPushPageState extends ConsumerState<FcmPushPage> {
               ),
               if (state.accessTokenPreview != null) ...[
                 const SizedBox(height: 8),
-                Text('${l10n.fcmTokenPreview}: ${state.accessTokenPreview}'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.fcmTokenPreview,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => _copyText(state.accessTokenPreview!),
+                      icon: const Icon(Icons.copy_rounded, size: 16),
+                      label: Text(l10n.copy),
+                    ),
+                  ],
+                ),
+                SelectableText(
+                  state.accessTokenPreview!,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 12.5,
+                    height: 1.35,
+                  ),
+                ),
               ],
             ],
           ),

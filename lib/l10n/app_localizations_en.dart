@@ -1827,7 +1827,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fcmGenerateToken => 'Generate access token';
 
   @override
-  String get fcmTokenPreview => 'Token preview';
+  String get fcmTokenPreview => 'Access Token';
 
   @override
   String get fcmMessageSection => 'Message';

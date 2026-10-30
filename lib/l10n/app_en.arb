@@ -512,7 +512,7 @@
   "fcmNoAccount": "No service account loaded",
   "fcmSelectedProject": "Current project",
   "fcmGenerateToken": "Generate access token",
-  "fcmTokenPreview": "Token preview",
+  "fcmTokenPreview": "Access Token",
   "fcmMessageSection": "Message",
   "fcmModeSimple": "Simple form",
   "fcmModeJson": "Full JSON",

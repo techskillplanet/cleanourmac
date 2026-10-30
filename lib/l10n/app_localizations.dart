@@ -3178,7 +3178,7 @@ abstract class AppLocalizations {
   /// No description provided for @fcmTokenPreview.
   ///
   /// In zh, this message translates to:
-  /// **'Token 预览'**
+  /// **'Access Token'**
   String get fcmTokenPreview;
 
   /// No description provided for @fcmMessageSection.

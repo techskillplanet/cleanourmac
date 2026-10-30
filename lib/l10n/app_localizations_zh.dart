@@ -1757,7 +1757,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fcmGenerateToken => '生成 Access Token';
 
   @override
-  String get fcmTokenPreview => 'Token 预览';
+  String get fcmTokenPreview => 'Access Token';
 
   @override
   String get fcmMessageSection => '消息';
