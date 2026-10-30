@@ -213,6 +213,7 @@
 				33CC10EB2044A3C60003C045 /* Resources */,
 				33CC110E2044A8840003C045 /* Bundle Framework */,
 				3399D490228B24CF009A79C7 /* ShellScript */,
+				A7C9E2F14B8D406E9F1A2C3D /* Embed Bundled Scrcpy */,
 			);
 			buildRules = (
 			);
@@ -338,6 +339,25 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh && touch Flutter/ephemeral/tripwire";
+		};
+		A7C9E2F14B8D406E9F1A2C3D /* Embed Bundled Scrcpy */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Bundled Scrcpy";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\nSRC=\"$PROJECT_DIR/../third_party/scrcpy\"\nif [ ! -x \"$SRC/scrcpy\" ]; then\n  \"$PROJECT_DIR/../tool/bundle_scrcpy.sh\"\nfi\nif [ ! -x \"$SRC/scrcpy\" ]; then\n  echo \"warning: bundled scrcpy missing; Screen Mirror needs brew scrcpy or ./tool/bundle_scrcpy.sh\"\n  exit 0\nfi\nDEST=\"$BUILT_PRODUCTS_DIR/$PRODUCT_NAME.app/Contents/Resources/scrcpy\"\nmkdir -p \"$BUILT_PRODUCTS_DIR/$PRODUCT_NAME.app/Contents/Resources\"\nrm -rf \"$DEST\"\ncp -R \"$SRC\" \"$DEST\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

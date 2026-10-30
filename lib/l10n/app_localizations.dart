@@ -1916,6 +1916,18 @@ abstract class AppLocalizations {
   /// **'截取屏幕'**
   String get takeScreenshot;
 
+  /// No description provided for @openScreenMirror.
+  ///
+  /// In zh, this message translates to:
+  /// **'屏幕镜像'**
+  String get openScreenMirror;
+
+  /// No description provided for @screenMirrorOpened.
+  ///
+  /// In zh, this message translates to:
+  /// **'已打开屏幕镜像窗口：{name}'**
+  String screenMirrorOpened(Object name);
+
   /// No description provided for @screenshotSaved.
   ///
   /// In zh, this message translates to:

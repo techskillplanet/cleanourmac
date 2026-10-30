@@ -1072,6 +1072,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get takeScreenshot => 'Take Screenshot';
 
   @override
+  String get openScreenMirror => 'Screen Mirror';
+
+  @override
+  String screenMirrorOpened(Object name) {
+    return 'Opened screen mirror for $name';
+  }
+
+  @override
   String screenshotSaved(Object path) {
     return 'Screenshot saved: $path';
   }

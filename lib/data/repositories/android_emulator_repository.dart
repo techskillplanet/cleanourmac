@@ -3,12 +3,18 @@ import '../../domain/models/android_emulator_config.dart';
 import '../../domain/models/android_environment_setup.dart';
 import '../shell/android_emulator_client.dart';
 import '../shell/android_environment_installer.dart';
+import '../shell/scrcpy_client.dart';
 
 class AndroidEmulatorRepository {
   final AndroidEmulatorClient _client;
   final AndroidEnvironmentInstaller _installer;
+  final ScrcpyClient _scrcpy;
 
-  AndroidEmulatorRepository(this._client, this._installer);
+  AndroidEmulatorRepository(
+    this._client,
+    this._installer, {
+    ScrcpyClient? scrcpy,
+  }) : _scrcpy = scrcpy ?? ScrcpyClient(adbBinary: _client.adbBinary);
 
   bool get isAvailable => _client.isAvailable;
 
@@ -64,6 +70,9 @@ class AndroidEmulatorRepository {
 
   Future<String> captureScreenshot(String serial, String deviceName) =>
       _client.captureScreenshot(serial, deviceName);
+
+  Future<void> openScreenMirror(String serial, {String? windowTitle}) =>
+      _scrcpy.launchMirror(serial, windowTitle: windowTitle);
 
   Future<void> restartAdb() => _client.restartAdb();
 

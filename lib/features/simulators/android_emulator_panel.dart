@@ -285,6 +285,34 @@ class _AndroidEmulatorPanelState extends ConsumerState<AndroidEmulatorPanel> {
         await _installApk(emu);
       case _AndroidAction.screenshot:
         await _captureScreenshot(emu);
+      case _AndroidAction.screenMirror:
+        await _openScreenMirror(emu);
+    }
+  }
+
+  Future<void> _openScreenMirror(AndroidEmulator emu) async {
+    final serial = emu.serial;
+    if (serial == null) return;
+    setState(() => _busyKeys.add(serial));
+
+    Object? error;
+    try {
+      await ref
+          .read(androidEmulatorRepositoryProvider)
+          .openScreenMirror(
+            serial,
+            windowTitle: '${context.l10n.openScreenMirror} · ${emu.name}',
+          );
+    } catch (e) {
+      error = e;
+    }
+    if (!mounted) return;
+
+    setState(() => _busyKeys.remove(serial));
+    if (error != null) {
+      _showError(context.l10n.openScreenMirror, error);
+    } else {
+      _showMessage(context.l10n.screenMirrorOpened(emu.name));
     }
   }
 
@@ -864,6 +892,17 @@ class _EmulatorCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             if (running) ...[
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.tonalIcon(
+                  onPressed: busy
+                      ? null
+                      : () => onAction(_AndroidAction.screenMirror),
+                  icon: const Icon(Icons.cast_connected_rounded, size: 18),
+                  label: Text(context.l10n.openScreenMirror),
+                ),
+              ),
+              const SizedBox(height: 14),
               Text(
                 context.l10n.developerTools,
                 style: TextStyle(
@@ -1172,7 +1211,14 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-enum _AndroidAction { copySerial, shell, logcat, installApk, screenshot }
+enum _AndroidAction {
+  copySerial,
+  shell,
+  logcat,
+  installApk,
+  screenshot,
+  screenMirror,
+}
 
 enum _AndroidMenuAction { copySerial, delete }
 

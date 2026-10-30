@@ -303,6 +303,13 @@
   "invalidApk": "Choose a valid .apk file",
   "apkInstalled": "APK installed on {name}",
   "takeScreenshot": "Take Screenshot",
+  "openScreenMirror": "Screen Mirror",
+  "screenMirrorOpened": "Opened screen mirror for {name}",
+  "@screenMirrorOpened": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "screenshotSaved": "Screenshot saved: {path}",
   "terminalOpened": "Opened {tool} for {name}",
   "virtualDevice": "Emulator",

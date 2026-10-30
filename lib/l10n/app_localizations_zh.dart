@@ -1036,6 +1036,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get takeScreenshot => '截取屏幕';
 
   @override
+  String get openScreenMirror => '屏幕镜像';
+
+  @override
+  String screenMirrorOpened(Object name) {
+    return '已打开屏幕镜像窗口：$name';
+  }
+
+  @override
   String screenshotSaved(Object path) {
     return '截图已保存：$path';
   }
