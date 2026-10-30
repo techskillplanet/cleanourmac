@@ -1,5 +1,6 @@
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n/localization_extensions.dart';
@@ -37,6 +38,9 @@ class _FcmPushPageState extends ConsumerState<FcmPushPage> {
     _imageController = TextEditingController(text: state.imageUrl);
     _dataController = TextEditingController(text: state.dataJson);
     _fullJsonController = TextEditingController(text: state.fullJson);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(fcmPushProvider.notifier).ensureDefaultAccountLoaded();
+    });
   }
 
   @override
@@ -212,6 +216,12 @@ class _FcmPushPageState extends ConsumerState<FcmPushPage> {
                     label: Text(l10n.fcmPickFile),
                   ),
                   OutlinedButton.icon(
+                    onPressed: () =>
+                        notifier.ensureDefaultAccountLoaded(force: true),
+                    icon: const Icon(Icons.restart_alt_rounded, size: 18),
+                    label: Text(l10n.fcmReloadDefault),
+                  ),
+                  OutlinedButton.icon(
                     onPressed: state.accounts.isEmpty
                         ? null
                         : notifier.clearAccounts,
@@ -372,6 +382,16 @@ class _FcmPushPageState extends ConsumerState<FcmPushPage> {
                   ),
                 ],
               ),
+              if (state.selectedAccount == null) ...[
+                const SizedBox(height: 10),
+                Text(
+                  l10n.fcmSendDisabledHint,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -379,9 +399,21 @@ class _FcmPushPageState extends ConsumerState<FcmPushPage> {
     );
   }
 
+  Future<void> _copyText(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.l10n.fcmCopied)));
+  }
+
   Widget _buildResultAndHistory(BuildContext context, FcmPushState state) {
     final l10n = context.l10n;
     final cs = Theme.of(context).colorScheme;
+    final resultText = [
+      if (state.lastResult != null) state.lastResult!,
+      if (state.error != null) state.error!,
+    ].join('\n\n');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -391,13 +423,25 @@ class _FcmPushPageState extends ConsumerState<FcmPushPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (state.lastResult != null)
-                Text(state.lastResult!, style: TextStyle(color: cs.primary)),
-              if (state.error != null) ...[
-                if (state.lastResult != null) const SizedBox(height: 8),
-                Text(state.error!, style: TextStyle(color: cs.error)),
-              ],
-              if (state.lastResult == null && state.error == null)
+              if (resultText.isNotEmpty) ...[
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => _copyText(resultText),
+                    icon: const Icon(Icons.copy_rounded, size: 16),
+                    label: Text(l10n.copy),
+                  ),
+                ),
+                SelectableText(
+                  resultText,
+                  style: TextStyle(
+                    color: state.error != null ? cs.error : cs.primary,
+                    fontFamily: 'monospace',
+                    fontSize: 12.5,
+                    height: 1.35,
+                  ),
+                ),
+              ] else
                 Text(l10n.fcmHistoryEmpty),
             ],
           ),
@@ -414,6 +458,8 @@ class _FcmPushPageState extends ConsumerState<FcmPushPage> {
                         ? (record.messageId ??
                               '${record.batchSuccess}/${record.batchTotal}')
                         : (record.errorSummary ?? 'failed');
+                    final line =
+                        '${record.at.toLocal()} · ${record.projectId} · ${record.mode.name} · $subtitle';
                     return ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
@@ -423,13 +469,18 @@ class _FcmPushPageState extends ConsumerState<FcmPushPage> {
                             : Icons.error_outline,
                         color: record.success ? cs.primary : cs.error,
                       ),
-                      title: Text(
+                      title: SelectableText(
                         '${record.projectId} · ${record.mode.name}',
                         style: const TextStyle(fontSize: 13),
                       ),
-                      subtitle: Text(
+                      subtitle: SelectableText(
                         '${record.at.toLocal()} · $subtitle',
                         style: const TextStyle(fontSize: 11),
+                      ),
+                      trailing: IconButton(
+                        tooltip: l10n.copy,
+                        onPressed: () => _copyText(line),
+                        icon: const Icon(Icons.copy_rounded, size: 16),
                       ),
                     );
                   }).toList(),

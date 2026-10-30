@@ -19,14 +19,22 @@ class FcmServiceAccount {
     this.type,
   });
 
-  FcmServiceAccount copyWith({String? label}) => FcmServiceAccount(
-    id: id,
+  FcmServiceAccount copyWith({
+    String? id,
+    String? label,
+    String? projectId,
+    String? clientEmail,
+    String? privateKey,
+    String? clientId,
+    String? type,
+  }) => FcmServiceAccount(
+    id: id ?? this.id,
     label: label ?? this.label,
-    projectId: projectId,
-    clientEmail: clientEmail,
-    privateKey: privateKey,
-    clientId: clientId,
-    type: type,
+    projectId: projectId ?? this.projectId,
+    clientEmail: clientEmail ?? this.clientEmail,
+    privateKey: privateKey ?? this.privateKey,
+    clientId: clientId ?? this.clientId,
+    type: type ?? this.type,
   );
 }
 

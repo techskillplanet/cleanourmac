@@ -1799,10 +1799,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fcmConfigHint =>
-      'Paste a Firebase service-account JSON or import a local file. Credentials stay in memory for this session only.';
+      'A bundled default service account loads automatically. You can still paste JSON or pick a file to add your own (memory only for this session).';
 
   @override
-  String get fcmPasteJson => 'Paste service-account JSON';
+  String get fcmPasteJson =>
+      'Paste service-account JSON (optional override/add)';
 
   @override
   String get fcmImportJson => 'Import JSON';
@@ -1811,10 +1812,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fcmPickFile => 'Choose file';
 
   @override
+  String get fcmReloadDefault => 'Reload default account';
+
+  @override
   String get fcmClearAccounts => 'Clear accounts';
 
   @override
-  String get fcmNoAccount => 'No service account imported';
+  String get fcmNoAccount => 'No service account loaded';
 
   @override
   String get fcmSelectedProject => 'Current project';
@@ -1883,4 +1887,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fcmBusy => 'Working…';
+
+  @override
+  String get fcmSendDisabledHint =>
+      'Wait for the default account to load, or import a service-account JSON to enable Send.';
+
+  @override
+  String get fcmCopied => 'Copied to clipboard';
 }

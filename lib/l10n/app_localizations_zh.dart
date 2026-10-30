@@ -1730,10 +1730,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fcmConfigSection => '服务账号配置';
 
   @override
-  String get fcmConfigHint => '粘贴 Firebase 服务账号 JSON，或从本地文件导入。配置只保存在当前会话内存中。';
+  String get fcmConfigHint => '默认会自动加载内置服务账号；也可粘贴 JSON 或选择文件导入自己的账号（会话内存，不落盘）。';
 
   @override
-  String get fcmPasteJson => '粘贴服务账号 JSON';
+  String get fcmPasteJson => '粘贴服务账号 JSON（可选，用于覆盖/新增）';
 
   @override
   String get fcmImportJson => '导入 JSON';
@@ -1742,10 +1742,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fcmPickFile => '选择文件';
 
   @override
+  String get fcmReloadDefault => '重新加载默认账号';
+
+  @override
   String get fcmClearAccounts => '清空配置';
 
   @override
-  String get fcmNoAccount => '尚未导入服务账号';
+  String get fcmNoAccount => '尚未加载服务账号';
 
   @override
   String get fcmSelectedProject => '当前项目';
@@ -1814,4 +1817,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get fcmBusy => '处理中…';
+
+  @override
+  String get fcmSendDisabledHint => '请等待默认账号加载完成，或自行导入服务账号 JSON 后再发送。';
+
+  @override
+  String get fcmCopied => '已复制到剪贴板';
 }

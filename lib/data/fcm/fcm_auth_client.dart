@@ -59,6 +59,7 @@ class FcmAuthClient {
     }
 
     final expSeconds = expirationSeconds.clamp(1, 3600);
+    final issuedAt = now.millisecondsSinceEpoch ~/ 1000;
     final assertion = await _jwtSigner(
       'RS256',
       header: const {'alg': 'RS256', 'typ': 'JWT'},
@@ -66,7 +67,8 @@ class FcmAuthClient {
         'iss': clientEmail,
         'scope': messagingScope,
         'aud': oauthTokenUrl,
-        'exp': now.millisecondsSinceEpoch ~/ 1000 + expSeconds,
+        'iat': issuedAt,
+        'exp': issuedAt + expSeconds,
       },
       key: privateKey,
     );

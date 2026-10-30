@@ -3124,13 +3124,13 @@ abstract class AppLocalizations {
   /// No description provided for @fcmConfigHint.
   ///
   /// In zh, this message translates to:
-  /// **'粘贴 Firebase 服务账号 JSON，或从本地文件导入。配置只保存在当前会话内存中。'**
+  /// **'默认会自动加载内置服务账号；也可粘贴 JSON 或选择文件导入自己的账号（会话内存，不落盘）。'**
   String get fcmConfigHint;
 
   /// No description provided for @fcmPasteJson.
   ///
   /// In zh, this message translates to:
-  /// **'粘贴服务账号 JSON'**
+  /// **'粘贴服务账号 JSON（可选，用于覆盖/新增）'**
   String get fcmPasteJson;
 
   /// No description provided for @fcmImportJson.
@@ -3145,6 +3145,12 @@ abstract class AppLocalizations {
   /// **'选择文件'**
   String get fcmPickFile;
 
+  /// No description provided for @fcmReloadDefault.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新加载默认账号'**
+  String get fcmReloadDefault;
+
   /// No description provided for @fcmClearAccounts.
   ///
   /// In zh, this message translates to:
@@ -3154,7 +3160,7 @@ abstract class AppLocalizations {
   /// No description provided for @fcmNoAccount.
   ///
   /// In zh, this message translates to:
-  /// **'尚未导入服务账号'**
+  /// **'尚未加载服务账号'**
   String get fcmNoAccount;
 
   /// No description provided for @fcmSelectedProject.
@@ -3288,6 +3294,18 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'处理中…'**
   String get fcmBusy;
+
+  /// No description provided for @fcmSendDisabledHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'请等待默认账号加载完成，或自行导入服务账号 JSON 后再发送。'**
+  String get fcmSendDisabledHint;
+
+  /// No description provided for @fcmCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'已复制到剪贴板'**
+  String get fcmCopied;
 }
 
 class _AppLocalizationsDelegate

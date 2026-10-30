@@ -503,12 +503,13 @@
   "fcmPushSubtitle": "Debug Firebase Cloud Messaging HTTP v1 locally",
   "fcmMemoryOnly": "Memory only · not saved",
   "fcmConfigSection": "Service account",
-  "fcmConfigHint": "Paste a Firebase service-account JSON or import a local file. Credentials stay in memory for this session only.",
-  "fcmPasteJson": "Paste service-account JSON",
+  "fcmConfigHint": "A bundled default service account loads automatically. You can still paste JSON or pick a file to add your own (memory only for this session).",
+  "fcmPasteJson": "Paste service-account JSON (optional override/add)",
   "fcmImportJson": "Import JSON",
   "fcmPickFile": "Choose file",
+  "fcmReloadDefault": "Reload default account",
   "fcmClearAccounts": "Clear accounts",
-  "fcmNoAccount": "No service account imported",
+  "fcmNoAccount": "No service account loaded",
   "fcmSelectedProject": "Current project",
   "fcmGenerateToken": "Generate access token",
   "fcmTokenPreview": "Token preview",
@@ -537,5 +538,7 @@
   "fcmResultSection": "Result",
   "fcmHistorySection": "Session send history",
   "fcmHistoryEmpty": "No sends in this session yet",
-  "fcmBusy": "Working…"
+  "fcmBusy": "Working…",
+  "fcmSendDisabledHint": "Wait for the default account to load, or import a service-account JSON to enable Send.",
+  "fcmCopied": "Copied to clipboard"
 }

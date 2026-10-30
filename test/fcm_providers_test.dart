@@ -50,6 +50,13 @@ void main() {
     expect(notifier.state.accounts, isEmpty);
     expect(notifier.state.selectedAccountId, isNull);
   });
+
+  test('loads default account from fallback file path', () async {
+    await notifier.ensureDefaultAccountLoaded(force: true);
+    expect(notifier.state.selectedAccountId, FcmPushNotifier.defaultAccountId);
+    expect(notifier.state.selectedAccount?.projectId, 'clp-bol');
+    expect(notifier.state.selectedAccount?.label, startsWith('默认'));
+  });
 }
 
 String _validServiceAccountJson() => '''

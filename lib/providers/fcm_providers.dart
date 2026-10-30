@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/fcm/fcm_auth_client.dart';
@@ -108,6 +109,11 @@ final fcmPushProvider =
     });
 
 class FcmPushNotifier extends StateNotifier<FcmPushState> {
+  static const defaultAssetPath = 'assets/fcm/default_firebase_adminsdk.json';
+  static const defaultAccountId = 'default_bundled';
+  static const fallbackServiceAccountPath =
+      '/Volumes/SSD-APFS/workplace/firebase-test/firebase-push-token/firebase-adminsdk.json';
+
   FcmPushNotifier({
     required this._auth,
     required this._push,
@@ -115,9 +121,50 @@ class FcmPushNotifier extends StateNotifier<FcmPushState> {
 
   final FcmAuthClient _auth;
   final FcmPushClient _push;
+  bool _defaultLoadAttempted = false;
 
   void setMode(FcmSendMode mode) {
     state = state.copyWith(mode: mode, clearError: true);
+  }
+
+  /// Loads bundled/default service account once so send works without paste.
+  Future<void> ensureDefaultAccountLoaded({bool force = false}) async {
+    if (!force &&
+        (state.accounts.any((account) => account.id == defaultAccountId) ||
+            _defaultLoadAttempted)) {
+      return;
+    }
+    _defaultLoadAttempted = true;
+
+    String? raw;
+    try {
+      raw = await rootBundle.loadString(defaultAssetPath);
+    } catch (_) {
+      final file = File(fallbackServiceAccountPath);
+      if (await file.exists()) {
+        raw = await file.readAsString();
+      }
+    }
+
+    if (raw == null || raw.trim().isEmpty) {
+      if (force) {
+        state = state.copyWith(
+          error:
+              '未找到默认服务账号，请将 JSON 放到 assets/fcm/default_firebase_adminsdk.json 或自行导入',
+        );
+      }
+      return;
+    }
+
+    final error = importServiceAccountJson(
+      raw,
+      id: defaultAccountId,
+      label: null,
+      select: state.selectedAccountId == null || force,
+    );
+    if (error != null && force) {
+      state = state.copyWith(error: error);
+    }
   }
 
   void updateSimpleFields({
@@ -141,18 +188,37 @@ class FcmPushNotifier extends StateNotifier<FcmPushState> {
     state = state.copyWith(fullJson: value, clearError: true);
   }
 
-  String? importServiceAccountJson(String raw, {String? label}) {
-    final parsed = FcmServiceAccountParser.parseJsonString(raw, label: label);
+  String? importServiceAccountJson(
+    String raw, {
+    String? id,
+    String? label,
+    bool select = true,
+  }) {
+    final parsed = FcmServiceAccountParser.parseJsonString(
+      raw,
+      id: id,
+      label: label,
+    );
     if (!parsed.isValid || parsed.account == null) {
       state = state.copyWith(error: parsed.errors.join(', '));
       return parsed.errors.join(', ');
     }
-    final account = parsed.account!;
-    final accounts = [...state.accounts, account];
+    var account = parsed.account!;
+    if (id == defaultAccountId || account.id == defaultAccountId) {
+      account = account.copyWith(
+        id: defaultAccountId,
+        label: '默认 (${account.projectId})',
+      );
+    }
+    final accounts = [
+      for (final existing in state.accounts)
+        if (existing.id != account.id) existing,
+      account,
+    ];
     _auth.clearCache();
     state = state.copyWith(
       accounts: accounts,
-      selectedAccountId: account.id,
+      selectedAccountId: select ? account.id : state.selectedAccountId,
       clearError: true,
       clearAccessTokenPreview: true,
     );

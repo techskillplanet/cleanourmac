@@ -39,7 +39,9 @@ void main() {
         expect(payload['iss'], 'svc@demo.iam.gserviceaccount.com');
         expect(payload['scope'], FcmAuthClient.messagingScope);
         expect(payload['aud'], FcmAuthClient.oauthTokenUrl);
+        expect(payload['iat'], isA<int>());
         expect(payload['exp'], isA<int>());
+        expect(payload['exp'] as int, greaterThan(payload['iat'] as int));
         expect(key, 'PRIVATE');
         return 'signed.jwt.value';
       },

@@ -503,12 +503,13 @@
   "fcmPushSubtitle": "本地调试 Firebase Cloud Messaging HTTP v1",
   "fcmMemoryOnly": "仅内存 · 不落盘",
   "fcmConfigSection": "服务账号配置",
-  "fcmConfigHint": "粘贴 Firebase 服务账号 JSON，或从本地文件导入。配置只保存在当前会话内存中。",
-  "fcmPasteJson": "粘贴服务账号 JSON",
+  "fcmConfigHint": "默认会自动加载内置服务账号；也可粘贴 JSON 或选择文件导入自己的账号（会话内存，不落盘）。",
+  "fcmPasteJson": "粘贴服务账号 JSON（可选，用于覆盖/新增）",
   "fcmImportJson": "导入 JSON",
   "fcmPickFile": "选择文件",
+  "fcmReloadDefault": "重新加载默认账号",
   "fcmClearAccounts": "清空配置",
-  "fcmNoAccount": "尚未导入服务账号",
+  "fcmNoAccount": "尚未加载服务账号",
   "fcmSelectedProject": "当前项目",
   "fcmGenerateToken": "生成 Access Token",
   "fcmTokenPreview": "Token 预览",
@@ -537,5 +538,7 @@
   "fcmResultSection": "结果",
   "fcmHistorySection": "会话发送记录",
   "fcmHistoryEmpty": "本会话还没有发送记录",
-  "fcmBusy": "处理中…"
+  "fcmBusy": "处理中…",
+  "fcmSendDisabledHint": "请等待默认账号加载完成，或自行导入服务账号 JSON 后再发送。",
+  "fcmCopied": "已复制到剪贴板"
 }
